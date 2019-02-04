@@ -1,0 +1,1077 @@
+#+TITLE: Joseph8th's Emacs Init
+#+AUTHOR: Joseph Edwards VIII
+#+EMAIL: jedwards8th at gmail.com
+#+DATE: 2019-01-27
+#+STARTUP: showall indent
+#+PROPERTY: header-args :results silent :tangle "init.el"
+
+* Introduction
+
+This is a Work-In-Progress!
+
+This ~init.el~ was originally based on "Dave's .emacs" (my CS prof at the University of New Mexico). Then I hacked away at it for many years myself, ended up with a working mess that required me moving the entire ~.emacs.d~ around. Then I reworked it as this literate Org file, relying on ~use-package~, and based on the following resources:
+
+  - [[http://pages.sachachua.com/.emacs.d/Sacha.html#babel-init][Sacha Chua]] - a literate Emacs config
+  - [[https://github.com/jamiecollinson/dotfiles/blob/master/config.org/][Jamie Collinson]] - another literate Emacs config based on Sacha's
+
+* Requirements
+
+I use the latest version of Emacs (26.1 now) so I can't predict how well this will work with earlier versions. I also use Linux Mint, so these requirements reflect packages available in Debian-based repositories. That said, I was able to use the ~init.el~ this file was derived from with Emacs in Windows with very few changes, so it should work on most systems.
+
+- **ag** needed by ~dumb-jump~ and ~ag~: ~apt install silversearcher-ag~
+- **editorconfig** needed by any ~prog-mode~: ~apt install editorconfig~
+
+* Installation
+
+I like to use the latest release of Emacs, rather than whatever is in my distro's repos. [[https://www.gnu.org/software/emacs/][That means building it from source.]] However, this config should work just fine with anything >~ 24.
+
+I *strongly* recommend running Emacs as a ~systemd~ service if you can. Then Emacs is already running as a server, and you're just connecting to it. Gives Emacs blazingly *FAST* startup. Here's my ~\~/.config/systemd/user/emacs.service~ file:
+
+#+BEGIN_EXAMPLE
+[Unit]
+Description=Emacs text editor
+Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/emacs --fg-daemon
+ExecStop=/usr/bin/emacsclient --eval "(kill-emacs)"
+Environment=SSH_AUTH_SOCK=%t/keyring/ssh
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+#+END_EXAMPLE
+
+Now you'll want to do ~systemctl --user enable emacs && systemctl --user start emacs~.
+
+* Usage
+
+Tangle this file using ~M-x org-babel-tangle~ (~C-c C-v t~), then copy or symlink to ~\~/.emacs.d/init.el~.
+
+*Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~.
+
+#+BEGIN_SRC emacs-lisp :tangle no :exports results :results none
+  (org-babel-tangle)
+#+END_SRC
+
+*Or*, even better, just save and let the ~after-save-hook~, defined in the Conclusion, do its thing.
+
+* Initialize
+
+Stuff to do during startup.
+
+** Package init with any custom load-path
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Initialize
+  ;;  -----------------------------------------------------------------------------
+
+  (package-initialize)
+  (add-to-list 'load-path "~/.emacs.d/lisp")
+  (add-to-list 'load-path "~/.emacs.d/elpa")
+
+  ;; Keep custom settings in a separate file to not pollute this one
+  (setq custom-file "~/.emacs.d/custom-settings.el")
+  (load custom-file t)
+#+END_SRC
+
+** Configure package sources
+
+Elpa (GNU) is the default, but I add it anyway. Disabling ~package-enable-at-startup~ is SOP to make startup a little quicker.
+
+#+BEGIN_SRC emacs-lisp
+  (setq package-check-signature nil)  ; because GNU ELPA keeps choking on the sigs
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+  (setq package-enable-at-startup nil)
+#+END_SRC
+
+** Bootstrap use-package
+
+Fire up ~use-package~, configured so that it will install and compile any missing dependencies on load.
+
+#+BEGIN_SRC emacs-lisp
+  ;; Bootstrap use-package
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (setq use-package-verbose t)
+  (setq use-package-always-ensure t)
+  (eval-when-compile (require 'use-package))
+  (use-package auto-compile
+    :config (auto-compile-on-load-mode))
+  (setq load-prefer-newer t)
+#+END_SRC
+
+** Increase garbage collector
+
+This is a nice little tidbit copied directly from Jamie Collinson's config. Bumps startup speed.
+
+#+BEGIN_SRC emacs-lisp
+  (setq gc-cons-threshold 10000000)
+
+  ;; Restore after startup
+  (add-hook 'after-init-hook
+            (lambda ()
+              (setq gc-cons-threshold 1000000)
+              (message "gc-cons-threshold restored to %S"
+                       gc-cons-threshold)))
+#+END_SRC
+
+** Get shell PATH
+
+Ensures environment variables in Emacs are the same as user shell
+
+#+BEGIN_SRC emacs-lisp
+  ;; Get user PATH
+  (use-package exec-path-from-shell
+    :config
+    (when (memq window-system '(mac ns x))
+      (exec-path-from-shell-initialize)))
+#+END_SRC
+
+* Preferences
+
+All the miscellaneous tweaks that customize Emacs just the way I like it. Much of this was taken from "Dave's .emacs" but the rest was just ad hoc.
+
+** Personal
+
+Obviously you'll want to edit the following, unless you are me:
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Preferences
+  ;;  ----------------------------------------------------------------------------
+
+  (setq user-full-name "Joseph Edwards VIII"
+        user-mail-address "jedwards8th@gmail.com")
+#+END_SRC
+
+** Short "yes" and "no"
+
+#+BEGIN_SRC emacs-lisp
+  ;; Ask "y" or "n" instead of "yes" or "no". Yes, laziness is great.
+  (fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+** Parentheses configuration
+
+#+BEGIN_SRC emacs-lisp
+  ;; Highlight corresponding parentheses when cursor is on one
+  (show-paren-mode t)
+#+END_SRC
+
+** Clean up whitespace
+
+#+BEGIN_SRC emacs-lisp
+  ;; Remove useless whitespace before saving a file
+  (setq-default nuke-trailing-whitespace-p t)
+  (add-hook 'before-save-hook 'whitespace-cleanup)
+  (add-hook 'before-save-hook (lambda() (delete-trailing-whitespace)))
+#+END_SRC
+
+** Revert file when changed on disk
+
+Saved me many a time. No more having to say "no" on save because the file on disk has changed since I started editing it.
+
+#+BEGIN_SRC emacs-lisp
+;; Auto-revert to disk on file change
+(global-auto-revert-mode t)
+#+END_SRC
+
+** Set UTF-8 locale defaults
+
+#+BEGIN_SRC emacs-lisp
+  ;; Set locale to UTF8
+  (set-language-environment 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (setq locale-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+#+END_SRC
+
+** No more Windows line-endings
+
+Because, yuck!
+
+#+BEGIN_SRC emacs-lisp
+  ;; hide DOS ^M line-endings
+  (defun remove-dos-eol ()
+    "Do not show ^M in files containing mixed UNIX and DOS line endings."
+    (interactive)
+    (setq buffer-display-table (make-display-table))
+    (aset buffer-display-table ?\^M []))
+  (add-hook 'text-mode-hook 'remove-dos-eol)
+#+END_SRC
+
+** Shell mode configuration
+
+Couple items here taken from "Dave's .emacs" (marked DHA)
+
+#+BEGIN_SRC emacs-lisp
+  ;; truncate shell buffer to 1024 - comint-buffer-maximum-size
+  (setq comint-buffer-maximum-size 2048)
+  (add-hook 'comint-output-filter-functions
+            'comint-truncate-buffer)
+
+  ;; Disable undo in shell
+  (add-hook 'shell-mode-hook 'buffer-disable-undo)
+
+  ;; shell-switcher
+  (setq shell-switcher-mode t)
+
+  ;;; [DHA] Keep a much bigger shell command history for M-p
+  (setq comint-input-ring-size 1000)
+
+  ;;; [DHA] Avoid unicodeisms in my shell buffers
+  (defun my-shell-customizations ()
+    "Set shell encoding"
+    (set-buffer-process-coding-system 'us-ascii-unix 'us-ascii-unix)
+  )
+  (setq shell-mode-hook 'my-shell-customizations)
+#+END_SRC
+
+** Better file buffer
+
+#+BEGIN_SRC emacs-lisp
+  ;; Make ibuffer default instead of list-buffers
+  (defalias 'list-buffers 'ibuffer)
+#+END_SRC
+
+** History configuration
+
+This one is copied directly from Sacha Chua's config:
+
+#+BEGIN_SRC emacs-lisp
+  ;; Better history
+  (setq savehist-file "~/.emacs.d/savehist")
+  (savehist-mode 1)
+  (setq history-length t
+        history-delete-duplicates t
+        savehist-save-minibuffer-history 1)
+  (setq savehist-additional-variables
+        '(kill-ring
+          search-ring
+          regexp-search-ring))
+#+END_SRC
+
+** Backup configuration
+
+I used to just disable backup files (very annoying in production environments), but this solution is far more elegant. Both Sacha and Jamie do something like this to keep backups in a separate location.
+
+#+BEGIN_SRC emacs-lisp
+  ;; Keep backup files in their own directory
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backups"))
+        backup-by-copying 1
+        delete-old-versions -1
+        version-control t
+        vc-make-backup-files t)
+  (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+#+END_SRC
+
+In case I want to go back to no backups, I move the ~:tangle no~ to the previous block and re-tangle with this:
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; Disable backup files
+  (setq make-backup-files nil
+        backup-inhibited t
+        auto-save-default nil)
+#+END_SRC
+
+* Interface
+
+** Window configuration
+
+Couple items here taken from "Daves .emacs", and some were lifted out of my old ~custom-set-variables~.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Interface
+  ;;  ----------------------------------------------------------------------------
+
+  ;; Fullscreen maximized frame in GUI mode
+  (modify-all-frames-parameters '((fullscreen . maximized)))
+
+  ;; Undo and redo window configurations C-c left and C-c right
+  (winner-mode 1)
+
+  ;; Word wrap on vertical split
+  (setq truncate-partial-width-windows nil)
+
+  ;; disable toolbar-mode in GUI
+  (tool-bar-mode -1)
+
+  ;; switch-window
+  (use-package switch-window)
+  (global-set-key (kbd "C-x o") 'switch-window)
+
+  ;; Scroll-bar? What's that?
+  (set-scroll-bar-mode nil)
+
+  ;; [DHA] I *never* use the stupid thing..
+  ;; (menu-bar-mode -1)
+
+  ;; split window vertically
+  ;; (split-window-right)
+
+  ;; [DHA] Show the time in the mode line
+  (display-time)                              ; how late am I?
+
+  ;; [DHA] Don't show the 'startup screen'
+  (setq inhibit-startup-message t)            ; ok I've seen the copyleft &c
+#+END_SRC
+
+** Dave's .emacs customizations
+
+Because I've been using these for so long I don't even know what they are anymore.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Dave's .emacs
+  ;;  UNM version, hacked down for student distribution
+  ;;  ----------------------------------------------------------------------------
+
+  ;; ^T - This version always exchanges the prior two chars, so it's
+  ;;      context-free as any bozo could tell it should've been all along
+  (defun dha-ctl-t ()
+    (interactive)
+    (transpose-chars -1)
+    (forward-char 1))
+
+  ;; Send current line to top of screen (on C-c C-l)
+  (defun dha-line-to-top () (interactive) (recenter 0))
+
+  ;; Finally f@*#$g make switch-to-buffer insist on an
+  ;; an existing buffer, unless given a prefix argument
+  (defun dha-switch-to-buffer (buf)
+    (interactive
+     (list (read-buffer
+            (if current-prefix-arg
+                "Switch to buffer: " "Switch to existing buffer: ")
+            nil (not current-prefix-arg))))
+    (switch-to-buffer buf))
+
+    ;;; Global key bindings [JE: these bindings are no longer valid! UPDATE OR DELETE]
+
+  (global-unset-key "\^Xn")                   ; I mistype ^Xn too much.
+
+  (global-unset-key "\^T")                    ; make ^T always transpose
+  (global-set-key "\^T" 'dha-ctl-t)           ;  previous two chars
+
+  (global-unset-key "\^Xb")                     ; kill normal switch-to-buffer
+  (global-set-key "\^Xb" 'dha-switch-to-buffer) ; use mine instead
+
+  (global-set-key "\^C\^R" 'replace-string)   ; ^C^R put replace on a key already!
+  (global-set-key "\^C\^Q" 'query-replace)    ; ^C^Q ditto query replace!
+  (global-set-key "\^C\^L" 'dha-line-to-top)  ; ^C^L point line to top of window
+
+  (global-set-key "\C-xc" 'compile)           ; ^Xc do compilation command
+  (global-set-key "\C-x*" 'shell)             ; ^X* start or switch to *shell*
+
+    ;;;Set the region to a C program and then do M-x ctest
+  (fset 'ctest
+        [?\M-w ?\C-x ?\C-f ?T ?e ?s ?t ?. ?c ?\C-m ?\C-x ?h ?\C-w ?\C-y ?\M-y ?\C-  ?\M-> ?\C-w ?\C-x ?\C-s ?\C-x ?c ?\C-a ?\C-k ?g ?c ?c ?  ?- ?g ?  ?- ?W ?a ?l ?l ?  ?- ?a ?n ?s ?i ?  ?- ?P ?\C-? ?p ?e ?d ?a ?n ?t ?i ?c ?  ?T ?e ?s ?t ?. ?c ?  ?- ?o ?  ?T ?e ?s ?t ?\; ?. ?/ ?T ?e ?s ?t ?\C-m ?\C-x ?b ?\C-m])
+#+END_SRC
+
+** Appearance
+
+SanityInc used to be my go-to, but I'm trying out Material for a while.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Appearance
+  ;;  ----------------------------------------------------------------------------
+
+  ;; See: https://www.greghendershott.com/2017/02/emacs-themes.html
+
+  ;; Extra dark BG with bright chars
+  (use-package color-theme-sanityinc-tomorrow)
+  ;; (load-theme 'sanityinc-tomorrow-bright)
+
+  ;; Material design has lots of nice features (TODO: customize)
+  (use-package material-theme
+    :defer t
+    :custom-face
+    ;; I want the background darker (TODO: tweak to perfection)
+    (default ((t (:inherit nil :stipple nil :background "#202023" :foreground "#ffffff" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "PfEd" :family "DejaVu Sans Mono"))))
+
+    ;; Document Info and keywords are too big in Material
+    (org-document-info ((t (:foreground "#81d4fa" :height 1.0))))
+    (org-document-info-keyword ((t (:inherit font-lock-comment-face :foreground "#8bc34a" :height 1.0))))
+
+    ;; Have to set the "org-hide" face to same as background esp for hide-stars/indent
+    (org-hide ((t (:background "#202023" :foreground "#202023"))))
+
+    ;; Material's level 1 & 2 headings are too big
+    (org-level-1 ((t (:inherit outline-1 :background "#455A64" :box (:line-width 1 :style released-button) :weight bold :height 1.1))))
+    (org-level-2 ((t (:inherit outline-2 :background "#35575b" :box (:line-width 1 :style released-button) :height 1.1))))
+)
+
+  ;; The actual theme to load
+  (load-theme 'material)
+
+  ;; Improved mode-line (TODO: customize)
+  (use-package telephone-line
+    :init
+    (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
+          telephone-line-secondary-left-separator 'telephone-line-cubed-hollow-left
+          telephone-line-primary-right-separator 'telephone-line-cubed-right
+          telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
+    (setq telephone-line-height 24
+          telephone-line-evil-use-short-tag t)
+    :config
+    (telephone-line-mode 1))
+
+  ;; Improve titlebar (Jamie)
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
+#+END_SRC
+
+** Org-mode
+
+Some basic ~org-mode~ preferences. Mostly vanilla, except I like ~visual-line-mode~ for org files.
+
+Oh yeah, and have to completely override ~org-html-fontify-code~ for export to work with ~fci-mode~, or get a bunch of weird extraneous characters on newline. See [[https://www.reddit.com/r/emacs/comments/2b5x5g/funny_characters_appended_at_new_line_to_source/][this thread]].
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Org-mode
+  ;;  ----------------------------------------------------------------------------
+
+  ;; Get htmlize
+  (use-package htmlize)
+
+  ;; Want a more local copy of org-mode so that I can override stuff if I want
+  (use-package org
+    :mode ("\\.org\\'" . org-mode)
+    :hook ((org-mode . visual-line-mode)
+           (org-mode . org-indent-mode))
+    :config
+    (setq org-todo-keywords
+          '((sequence "TODO" "DEV" "READY" "QA" "FAILED" "|" "DONE" "CLOSED")))
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((shell . t)
+       (python . t)
+       (ditaa . t)
+       )))
+
+  ;; Patch ox-html.el org-html-fontify-code to avoid weird newline chars with fci-mode
+  (eval-after-load "ox-html"
+    '(defun org-html-fontify-code (code lang)
+       "Color CODE with htmlize library.
+  CODE is a string representing the source code to colorize.  LANG
+  is the language used for CODE, as a string, or nil."
+       (when code
+         (cond
+          ;; No language.  Possibly an example block.
+          ((not lang) (org-html-encode-plain-text code))
+          ;; Plain text explicitly set.
+          ((not org-html-htmlize-output-type) (org-html-encode-plain-text code))
+          ;; No htmlize library or an inferior version of htmlize.
+          ((not (and (or (require 'htmlize nil t)
+                         (error "Please install htmlize from \
+  https://github.com/hniksic/emacs-htmlize"))
+                     (fboundp 'htmlize-region-for-paste)))
+           ;; Emit a warning.
+           (message "Cannot fontify src block (htmlize.el >= 1.34 required)")
+           (org-html-encode-plain-text code))
+          (t
+           ;; Map language
+           (setq lang (or (assoc-default lang org-src-lang-modes) lang))
+           (let* ((lang-mode (and lang (intern (format "%s-mode" lang)))))
+             (cond
+              ;; Case 1: Language is not associated with any Emacs mode
+              ((not (functionp lang-mode))
+               (org-html-encode-plain-text code))
+              ;; Case 2: Default.  Fontify code.
+              (t
+               ;; htmlize
+               (setq code
+                     (let ((output-type org-html-htmlize-output-type)
+                           (font-prefix org-html-htmlize-font-prefix))
+                       (with-temp-buffer
+                         ;; Switch to language-specific mode.
+                         (funcall lang-mode)
+
+                         ;; BEGIN PATCH: fix fci-mode export
+                         (when (require 'fill-column-indicator nil 'noerror)
+                           (fci-mode -1))
+                         ;; END PATCH
+
+                         (insert code)
+                         ;; Fontify buffer.
+                         (org-font-lock-ensure)
+                         ;; Remove formatting on newline characters.
+                         (save-excursion
+                           (let ((beg (point-min))
+                                 (end (point-max)))
+                             (goto-char beg)
+                             (while (progn (end-of-line) (< (point) end))
+                               (put-text-property (point) (1+ (point)) 'face nil)
+                               (forward-char 1))))
+                         (org-src-mode)
+                         (set-buffer-modified-p nil)
+                         ;; Htmlize region.
+                         (let ((org-html-htmlize-output-type output-type)
+                               (org-html-htmlize-font-prefix font-prefix))
+                           (org-html-htmlize-region-for-paste
+                            (point-min) (point-max))))))
+               ;; Strip any enclosing <pre></pre> tags.
+               (let* ((beg (and (string-match "\\`<pre[^>]*>\n?" code) (match-end 0)))
+                      (end (and beg (string-match "</pre>\\'" code))))
+                 (if (and beg end) (substring code beg end) code)))))))))
+    )
+#+END_SRC
+
+For my ~oporg~ project (WIP), so not tangled by default.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; oporg - Settings and convenience for oporg and org-ehtml
+  ;;  ----------------------------------------------------------------------------
+
+  ;; TODO (use-package request)
+  ;; (use-package web-server)
+  ;; (use-package websocket)
+  (use-package org-ehtml
+    :init
+    (setq org-ehtml-docroot (expand-file-name "~/public_org"))
+    (setq org-ehtml-everything-editable t))
+
+  (defun public-org-start (approot port)
+    "Prompts for APPROOT and PORT to the run the web-server."
+    (interactive
+     (list
+      (read-string
+       (format "Path to app root (%s): " org-ehtml-docroot)
+       nil nil org-ehtml-docroot)
+      (read-string
+       (format "Port to run the web-server on (%d): " 8888)
+       nil nil 8888)
+      ))
+    (setq org-ehtml-docroot (expand-file-name approot))
+    (ws-start org-ehtml-handler port))
+
+  (defun public-org-stop ()
+    (interactive)
+    (ws-stop-all))
+#+END_SRC
+
+* Custom Functions
+
+Some functions that I have found handy at one point or another, and somehow made their way into my ~init.el~.
+
+** Batch replace strings
+
+Very handy when you want to search-and-replace a lot of pairs in one go.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Custom functions
+  ;;  ----------------------------------------------------------------------------
+
+  ;; Search and replace pair-by-pair
+  (defun batch-replace-strings (replacement-alist)
+    "Prompt user for pairs of strings to search/replace, then do so in the current buffer"
+    (interactive (list (batch-replace-strings-prompt)))
+    (dolist (pair replacement-alist)
+      (save-excursion
+        (replace-string (car pair) (cdr pair)))))
+
+  (defun batch-replace-strings-prompt ()
+    "prompt for string pairs and return as an association list"
+    (let (from-string
+          ret-alist)
+      (while (not (string-equal "" (setq from-string (read-string "String to search (RET to stop): "))))
+        (setq ret-alist
+              (cons (cons from-string (read-string (format "Replace %s with: " from-string)))
+                    ret-alist)))
+      ret-alist))
+
+#+END_SRC
+
+* Packages
+
+I've grouped these so that packages with system dependencies can be ignored by adding ~:tangle no~. Using ~use-package~ obliviates the need for a separate install/ensure and configuration steps, but spreads it out more. A lot of these packages were originally installed using ~package-list-packages~, so the configuration had to be moved out of ~custom-set-variables~ and into the respective package section of this file.
+
+** Legacy ensure packages
+
+Here's a dump of all the packages I had installed through ELPA or MELPA via ~package-list-packages~, or in a hack no longer included. The following code will install the packages if they aren't already installed. *However* this can cause problems if the system dependencies are not already installed. Plus, I might not want all of these on every environment I install Emacs on.
+
+*Note* this is set to ~:tangle no~.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (setq package-list '(ag auto-complete-sage auto-yasnippet autopair cargo color-theme color-theme-sanityinc-tomorrow company-racer dumb-jump editorconfig eglot ein-mumamo ein auto-complete elpy company exec-path-from-shell fill-column-indicator find-file-in-project flycheck-inline flycheck-rust flycheck flymake git-commit-mode helm-ag helm-projectile helm-sage helm-system-packages helm helm-core highlight-indentation htmlize ido-hacks ido-vertical-mode ivy json-mode json-reformat json-snatcher jsonrpc magit git-commit magit-popup material-theme mmm-mode multiple-cursors ob-ipython dash-functional org org-ehtml php-mode popup project-explorer es-windows es-lib pyvenv racer pos-tip request rust-mode rust-playground rustic markdown-mode projectile pkg-info epl f dash s sage-shell-mode deferred shell-switcher skewer-mode js2-mode simple-httpd spinner sr-speedbar switch-window tabbar telephone-line use-package bind-key web-server websocket with-editor async xterm-color yaml-mode yasnippet))
+
+  (unless package-archive-contents
+    (package-refresh-contents))
+  (dolist (package package-list)
+    (unless (package-installed-p package)
+      (package-install package)))
+#+END_SRC
+
+** Programming utilities
+
+General programming utility packages with no system dependencies.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Programming utilities
+  ;;  ----------------------------------------------------------------------------
+
+  ;; Smartparens - keep parentheses balanced (from Jamie's)
+  (use-package smartparens
+    :diminish smartparens-mode
+    :config
+    (add-hook 'prog-mode-hook 'smartparens-mode))
+
+  ;; Highlight nested parentheses (from Jamie's)
+  (use-package rainbow-delimiters
+    :config
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+
+  ;; Color comprehension
+  (use-package rainbow-mode
+    :config
+    (setq rainbow-x-colors nil)
+    (add-hook 'prog-mode-hook 'rainbow-mode))
+
+  ;; Init fill-column indicator (add to mode hooks per language)
+  (use-package fill-column-indicator
+    :init
+    (setq-default fci-rule-column 80))
+
+  ;; Flycheck
+  (use-package flycheck
+    :config
+    (global-flycheck-mode))
+  (use-package flycheck-inline
+    :config
+    (add-hook 'flycheck-mode-hook #'turn-on-flycheck-inline))
+
+  ;; Highlight-symbol TODO CHECK ME
+  (use-package highlight-symbol
+    :bind (([(control f3)] . highlight-symbol-at-point)
+           ([f3] . highlight-symbol-next)
+           ([(shift f3)] . highlight-symbol-prev)
+           ([(meta f3)] . highlight-symbol-query-replace)))
+
+  ;; Auto-complete
+  (use-package auto-complete
+    :init
+    (require 'auto-complete-config)
+    (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
+    :config
+    (ac-config-default))
+
+  ;; Autopair
+  (use-package autopair
+    :config
+    (autopair-global-mode))
+
+  ;; Multiple-cursors
+  (use-package multiple-cursors
+    :bind (("C-S-c C-S-c" . mc/edit-lines)
+           ("C->" . mc/mark-next-like-this)
+           ("C-<" . mc/mark-previous-like-this)
+           ("C-c C-<" . mc/mark-all-like-this)
+           ("C-S-<mouse-1>" . mc/add-cursor-on-click)))
+
+  ;; Yasnippet
+  (use-package yasnippet
+    :init
+    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+    :bind (:map yas-minor-mode-map
+                ("<tab>" . nil)
+                ("TAB" . nil)
+                ("<C-tab>" . yas-expand)
+                ("C-j" . yas-next-field))
+    :config
+    (yas-global-mode 1))
+
+  ;; Magit, of course
+  (use-package magit
+    :bind (("C-x g" . magit-status))
+    :config
+    (use-package magit-popup))
+
+  ;; Editorconfig
+  (use-package editorconfig
+    :config
+    (editorconfig-mode 1))
+
+  ;; Silversearcher support - faster-than-grep
+  (use-package ag)
+
+  ;; Company support - text completion
+  (use-package company)
+
+  ;; REST Client in Emacs? But of course!
+  (use-package restclient)
+
+  ;; SO in Emacs? Uh-huh. (Thx Jamie)
+  (use-package sx
+    :config
+    (bind-keys :prefix "C-c s"
+               :prefix-map my-sx-map
+               :prefix-docstring "Global keymap for SX."
+               ("q" . sx-tab-all-questions)
+               ("i" . sx-inbox)
+               ("o" . sx-open-link)
+               ("u" . sx-tab-unanswered-my-tags)
+               ("a" . sx-ask)
+               ("s" . sx-search)))
+#+END_SRC
+
+*** Slack
+
+Yes, **that** Slack. See [[https://github.com/yuya373/emacs-slack][here]] for config details. Untangled by default.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; Slack in Emacs? Well, yeah!
+  (use-package slack
+    :commands (slack-start))
+#+END_SRC
+
+
+** Navigation and projects
+
+Projectile + Helm + IDO.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Navigation and projects
+  ;;  ----------------------------------------------------------------------------
+
+  ;; IDO
+  (use-package ido
+    :config
+    (use-package ido-vertical-mode)
+    (use-package ido-hacks)
+    (ido-mode t)
+    (ido-vertical-mode))
+
+  (defun ido-find-file-in-tag-files ()
+    (interactive)
+    (save-excursion
+      (let ((enable-recursive-minibuffers t))
+        (visit-tags-table-buffer))
+      (find-file
+       (expand-file-name
+        (ido-completing-read
+         "Project file: " (tags-table-files) nil t)))))
+
+  (global-set-key (kbd "C-S-x C-S-f") 'ido-find-file-in-tag-files)
+
+  ;; Projectile
+  (use-package projectile
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :config
+    (projectile-mode +1))
+
+  ;; Helm - incremental completions and narrowing
+  (use-package helm
+    :config
+    (use-package helm-projectile)
+    (use-package helm-ag)
+    (use-package helm-sage))
+
+  ;; Dumb jump
+  (use-package dumb-jump
+    :config
+    (dumb-jump-mode))
+#+END_SRC
+
+*** TabBarMode (disabled)
+
+I like ~tabbar~ but it doesn't play nice with ~use-package~! So install it from MELPA and customize the GUI way (ugh). Then the following can be added to group tabs by ~git~ project.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (defun find-git-dir (dir)
+    "Search up the directory tree looking for a .git folder."
+    (cond
+     ((eq major-mode 'dired-mode) "Dired")
+     ((not dir) "process")
+     ((string= dir "/") "no-git")
+     ((file-exists-p (concat dir "/.git")) dir)
+     (t (find-git-dir (directory-file-name (file-name-directory dir))))))
+
+  (defun git-tabbar-buffer-groups ()
+    "Groups tabs in tabbar-mode by the git repository they are in."
+    (list (find-git-dir (buffer-file-name (current-buffer)))))
+  (setq tabbar-buffer-groups-function 'git-tabbar-buffer-groups)
+#+END_SRC
+
+** Language-specific
+
+Language-specific packages and configuration.
+
+*** Emacs-Lisp
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Emacs-Lisp
+  ;;  ----------------------------------------------------------------------------
+
+  (add-hook 'emacs-lisp-mode-hook 'fci-mode)
+#+END_SRC
+
+*** PHP and HTML
+
+#+BEGIN_SRC emacs-lisp
+  ;;; PHP and HTML
+  ;;  ----------------------------------------------------------------------------
+
+  (use-package web-mode)
+  (use-package mmm-mode
+    :init
+    (setq mmm-global-mode 'maybe)
+    :config
+    (mmm-add-mode-ext-class 'html-mode "\\.php\\'" 'html-php))
+
+  (use-package php-mode
+    :hook ((php-mode . editorconfig-mode)
+           (php-mode . fci-mode)
+           (php-mode . (lambda ()
+             (defun ywb-php-lineup-arglist-intro (langelem)
+               (save-excursion
+                 (goto-char (cdr langelem))
+                 (vector (+ (current-column) c-basic-offset))))
+             (defun ywb-php-lineup-arglist-close (langelem)
+               (save-excursion
+                 (goto-char (cdr langelem))
+                 (vector (current-column))))
+             (c-set-offset 'arglist-intro 'ywb-php-lineup-arglist-intro)
+             (c-set-offset 'arglist-close 'ywb-php-lineup-arglist-close)))))
+#+END_SRC
+
+*** Python
+
+I use the iPython3 interpreter, so make sure it's installed.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Python
+  ;;  ----------------------------------------------------------------------------
+
+  ;; TODO - Use elpy?
+  ;; (elpy-enable)
+
+  (use-package python
+    :mode ("\\.py\\'" . python-mode)
+    :interpreter ("/usr/bin/ipython3" . python-mode)
+    :hook (python-mode . fci-mode)
+    :config
+    (use-package pyvenv))
+#+END_SRC
+
+*** Markdown
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Markdown (from Jamie's)
+  ;;  ----------------------------------------------------------------------------
+
+  (use-package markdown-mode
+    :commands (markdown-mode gfm-mode)
+    :mode (("README\\.md\\'" . gfm-mode)
+           ("\\.md\\'" . markdown-mode)
+           ("\\.markdown\\'" . markdown-mode))
+    :init (setq markdown-command "multimarkdown"))
+#+END_SRC
+
+*** JSON
+
+#+BEGIN_SRC emacs-lisp
+;;; JSON
+;;  ----------------------------------------------------------------------------
+
+(use-package json-mode)
+(use-package json-reformat)
+(use-package jsonrpc)
+#+END_SRC
+
+*** XML
+
+#+BEGIN_SRC emacs-lisp
+  ;;; XML
+  ;;  ----------------------------------------------------------------------------
+
+  ;; pretty print xml region
+  (defun pretty-print-xml-region (begin end)
+    "Pretty format XML markup in region. You need to have nxml-mode
+  http://www.emacswiki.org/cgi-bin/wiki/NxmlMode installed to do
+  this.  The function inserts linebreaks to separate tags that have
+  nothing but whitespace between them.  It then indents the markup
+  by using nxml's indentation rules."
+    (interactive "r")
+    (save-excursion
+      (nxml-mode)
+      (goto-char begin)
+      ;; split <foo><foo> or </foo><foo>, but not <foo></foo>
+      (while (search-forward-regexp ">[ \t]*<[^/]" end t)
+        (backward-char 2) (insert "\n") (incf end))
+      ;; split <foo/></foo> and </foo></foo>
+      (goto-char begin)
+      (while (search-forward-regexp "<.*?/.*?>[ \t]*<" end t)
+        (backward-char) (insert "\n") (incf end))
+      (indent-region begin end nil)
+      (normal-mode))
+    (message "All indented!"))
+
+  (eval-after-load 'nxml-mode
+    '(define-key nxml-mode-map (kbd "C-c C-f") 'pretty-print-xml-region))
+#+END_SRC
+
+*** Yaml
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Yaml
+  ;;  ----------------------------------------------------------------------------
+
+  (use-package yaml-mode
+    :init
+    (setq indent-tabs-mode nil)
+    :mode "\\.yml\\'"
+    :bind (:map yaml-mode-map
+                ("C-m" . newline-and-indent)))
+#+END_SRC
+
+*** Optional
+
+These are all untangled, because either I don't use them very often, or they require additional setup that I haven't bothered to document, yet.
+
+**** Emacs iPython Notebook (Jupyter)
+
+This is another WIP and requires that Anaconda is being used, one way or another (or manual installation).
+
+See [[https://millejoh.github.io/emacs-ipython-notebook/][EIN]] for requirements and other caveats.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; Emacs iPython Notebook (EIN) with Jupyter support
+  ;;  ----------------------------------------------------------------------------
+
+  (use-package ein
+    :config
+    (use-package ein-notebook)
+    (use-package ein-subpackages)
+    (use-package ein-mumamo))
+#+END_SRC
+
+**** Rust
+
+There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ to work, so the init code for those sections are not tangled by default.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; Rust
+  ;;  TODO: change all 'add-hook' to use use-package 'hook:'
+  ;;  ----------------------------------------------------------------------------
+
+  ;; Rust lang
+  (add-to-list 'exec-path "~/.cargo/bin")
+  (use-package rust-mode
+    :defer t
+    :mode "\\.rs\\'"
+    :config (setq rust-format-on-save t)
+    :init
+    (add-hook 'rust-mode-hook 'fci-mode))
+
+  (use-package rustic)
+  (use-package cargo
+    :init
+    (add-hook 'rust-mode-hook 'cargo-minor-mode)
+    (add-hook 'rust-mode-hook
+              (lambda ()
+                (local-set-key (kbd "C-c <tab>") #'rust-format-buffer)))
+    (add-hook 'toml-mode-hook 'cargo-minor-mode))
+
+  (use-package racer
+    :init
+    (add-hook 'rust-mode-hook #'racer-mode)
+    (add-hook 'racer-mode-hook #'eldoc-mode)
+    (add-hook 'racer-mode-hook #'company-mode)
+    :config
+    (use-package company-racer)
+    (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+    (setq racer-cmd "~/.cargo/bin/racer")
+    (setq racer-rust-src-path "~/Dev/rust/rust/src"))
+
+  ;; Flycheck for Rust
+  (use-package flycheck-rust
+    :init
+    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+#+END_SRC
+
+**** Go
+
+I don't use Go very often, so it's not tangled by default.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; Go
+  ;;  ----------------------------------------------------------------------------
+
+  (use-package go-mode)
+#+END_SRC
+
+**** Javascript
+
+Built-in js-mode works better for me than js2-mode or js3 in Emacs 26.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; Javascript
+  ;;  ----------------------------------------------------------------------------
+
+  (add-hook 'js3-mode-hook 'fci-mode)
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+  (add-hook 'js-mode-hook 'js2-minor-mode)
+#+END_SRC
+
+**** LaTeX
+
+I'll get around to tricking out \LaTeX\ one of these days.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; LaTeX
+  ;;  ----------------------------------------------------------------------------
+
+  ;;(load "auctex.el" nil t t)
+  ;;(load "preview-latex.el" nil t t)
+#+END_SRC
+
+**** DITAA
+
+Really, really nice to have for rendering ASCII charts and embedding them in ~org-mode~ exports. Must install ~ditaa.jar~ and update the path for this to work.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+;;; ditaa.jar
+;;  ----------------------------------------------------------------------------
+
+(setq org-ditaa-jar-path "/usr/bin/ditaa")
+#+END_SRC
+
+**** GNUPlot
+
+GNUPlot can be pretty handy, but I don't use it very often.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; GNUPlot
+  ;;  ----------------------------------------------------------------------------
+
+  ;; move the files gnuplot.el to someplace in your lisp load-path or
+  ;; use a line like
+  ;;  (setq load-path (append (list "/path/to/gnuplot") load-path))
+
+  ;; these lines enable the use of gnuplot mode
+  (autoload 'gnuplot-mode "gnuplot" "gnuplot major mode" t)
+  (autoload 'gnuplot-make-buffer "gnuplot" "open a buffer in gnuplot mode" t)
+
+  ;; this line automatically causes all files with the .gp extension to
+  ;; be loaded into gnuplot mode
+  (setq auto-mode-alist (append '(("\\.gp$" . gnuplot-mode)) auto-mode-alist))
+
+  ;; This line binds the function-9 key so that it opens a buffer into
+  ;; gnuplot mode
+  (global-set-key [(f9)] 'gnuplot-make-buffer)
+#+END_SRC
+
+
+
+* Conclusion
+
+Tangles on save.
+
+;; Local Variables:
+;; eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
+;; End:
