@@ -47,7 +47,7 @@ Now you'll want to do ~systemctl --user enable emacs && systemctl --user start e
 
 * Usage
 
-Tangle this file using ~M-x org-babel-tangle~ (~C-c C-v t~), then copy or symlink to ~\~/.emacs.d/init.el~.
+Tangle this file using ~M-x org-babel-tangle~ (~C-c C-v t~), then copy or symlink to =~/.emacs.d/init.el=.
 
 *Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~.
 
