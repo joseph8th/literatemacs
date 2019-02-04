@@ -55,7 +55,7 @@ Tangle this file using ~M-x org-babel-tangle~ (~C-c C-v t~), then copy or symlin
   (org-babel-tangle)
 #+END_SRC
 
-*Or*, even better, just save and let the ~after-save-hook~, defined in the Conclusion, do its thing.
+*Or*, even better, just save and let the ~after-save-hook~, defined in the [[#conclusion][Conclusion]], do its thing.
 
 * Initialize
 
