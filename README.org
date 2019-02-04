@@ -20,6 +20,7 @@ I use the latest version of Emacs (26.1 now) so I can't predict how well this wi
 
 - ~ag~ needed by ~dumb-jump~ and ~ag~: ~apt install silversearcher-ag~
 - ~editorconfig~ needed by any ~prog-mode~: ~apt install editorconfig~
+- ~ipython3~ needed to replace system's Python interpreter: ~apt install ipython3~
 
 * Installation
 
@@ -849,15 +850,18 @@ I use the iPython3 interpreter, so make sure it's installed.
   ;;; Python
   ;;  ----------------------------------------------------------------------------
 
-  ;; TODO - Use elpy?
-  ;; (elpy-enable)
-
+  ;; Basic python-mode config. I've been using this for years with no problems.
   (use-package python
     :mode ("\\.py\\'" . python-mode)
     :interpreter ("/usr/bin/ipython3" . python-mode)
     :hook (python-mode . fci-mode)
     :config
     (use-package pyvenv))
+
+  ;; Elpy makes Emacs a full Python IDE. Do I want that? I dunno yet. Guess I'll try it...
+  (use-package elpy
+    :config
+    (elpy-enable))
 #+END_SRC
 
 *** Markdown
