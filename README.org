@@ -720,7 +720,7 @@ General programming utility packages with no system dependencies.
 
 *** Slack
 
-Yes, **that** Slack.
+Yes, *that* Slack.
 
 See [[https://github.com/yuya373/emacs-slack][here]] for config details. Untangled by default.
 
