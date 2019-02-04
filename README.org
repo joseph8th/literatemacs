@@ -7,9 +7,9 @@
 
 * Introduction
 
-This is a Work-In-Progress!
+A literate README that produces my ~init.el~ for Emacs. This is a Work-In-Progress!
 
-This ~init.el~ was originally based on "Dave's .emacs" (my CS prof at the University of New Mexico). Then I hacked away at it for many years myself, ended up with a working mess that required me moving the entire ~.emacs.d~ around. Then I reworked it as this literate Org file, relying on ~use-package~, and based on the following resources:
+The ~init.el~ was originally based on "Dave's .emacs" (my CS prof at the University of New Mexico). Then I hacked away at it for many years myself, ended up with a working mess that required me moving the entire ~.emacs.d~ around. Then I reworked it as this literate Org file, relying on ~use-package~, and based on the following resources:
 
   - [[http://pages.sachachua.com/.emacs.d/Sacha.html#babel-init][Sacha Chua]] - a literate Emacs config
   - [[https://github.com/jamiecollinson/dotfiles/blob/master/config.org/][Jamie Collinson]] - another literate Emacs config based on Sacha's
@@ -18,14 +18,14 @@ This ~init.el~ was originally based on "Dave's .emacs" (my CS prof at the Univer
 
 I use the latest version of Emacs (26.1 now) so I can't predict how well this will work with earlier versions. I also use Linux Mint, so these requirements reflect packages available in Debian-based repositories. That said, I was able to use the ~init.el~ this file was derived from with Emacs in Windows with very few changes, so it should work on most systems.
 
-- **ag** needed by ~dumb-jump~ and ~ag~: ~apt install silversearcher-ag~
-- **editorconfig** needed by any ~prog-mode~: ~apt install editorconfig~
+- ~ag~ needed by ~dumb-jump~ and ~ag~: ~apt install silversearcher-ag~
+- ~editorconfig~ needed by any ~prog-mode~: ~apt install editorconfig~
 
 * Installation
 
 I like to use the latest release of Emacs, rather than whatever is in my distro's repos. [[https://www.gnu.org/software/emacs/][That means building it from source.]] However, this config should work just fine with anything >~ 24.
 
-I *strongly* recommend running Emacs as a ~systemd~ service if you can. Then Emacs is already running as a server, and you're just connecting to it. Gives Emacs blazingly *FAST* startup. Here's my ~\~/.config/systemd/user/emacs.service~ file:
+I *strongly* recommend running Emacs as a ~systemd~ service if you can. Then Emacs is already running as a server, and you're just connecting to it. Gives Emacs blazingly *FAST* startup. Here's my =~/.config/systemd/user/emacs.service= file:
 
 #+BEGIN_EXAMPLE
 [Unit]
@@ -51,7 +51,7 @@ Tangle this file using ~M-x org-babel-tangle~ (~C-c C-v t~), then copy or symlin
 
 *Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~.
 
-#+BEGIN_SRC emacs-lisp :tangle no :exports results :results none
+#+BEGIN_SRC emacs-lisp :tangle no
   (org-babel-tangle)
 #+END_SRC
 
@@ -121,7 +121,7 @@ This is a nice little tidbit copied directly from Jamie Collinson's config. Bump
 
 ** Get shell PATH
 
-Ensures environment variables in Emacs are the same as user shell
+Ensures environment variables in Emacs are the same as user shell.
 
 #+BEGIN_SRC emacs-lisp
   ;; Get user PATH
@@ -720,7 +720,9 @@ General programming utility packages with no system dependencies.
 
 *** Slack
 
-Yes, **that** Slack. See [[https://github.com/yuya373/emacs-slack][here]] for config details. Untangled by default.
+Yes, **that** Slack.
+
+See [[https://github.com/yuya373/emacs-slack][here]] for config details. Untangled by default.
 
 #+BEGIN_SRC emacs-lisp :tangle no
   ;; Slack in Emacs? Well, yeah!
