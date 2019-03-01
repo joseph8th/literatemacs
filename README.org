@@ -3,7 +3,7 @@
 #+EMAIL: jedwards8th at gmail.com
 #+DATE: 2019-02-08
 #+STARTUP: showall indent
-#+PROPERTY: header-args :results silent :tangle "init.el"
+#+PROPERTY: header-args :results silent :tangle "./init.el"
 
 * Introduction
 
@@ -867,7 +867,11 @@ I use the iPython3 interpreter, so make sure it's installed.
     (use-package pyvenv))
 
   ;; Elpy makes Emacs a full Python IDE. Do I want that? I dunno yet. Guess I'll try it...
+  (use-package py-autopep8)
   (use-package elpy
+    :init (setq python-shell-interpreter "ipython"
+                python-shell-interpreter-args "-i")
+    :hook (elpy-mode . py-autopep8-enable-on-save)
     :config
     (elpy-enable))
 #+END_SRC
