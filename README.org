@@ -592,22 +592,6 @@ Very handy when you want to search-and-replace a lot of pairs in one go.
 
 I've grouped these so that packages with system dependencies can be ignored by adding ~:tangle no~. Using ~use-package~ obliviates the need for a separate install/ensure and configuration steps, but spreads it out more. A lot of these packages were originally installed using ~package-list-packages~, so the configuration had to be moved out of ~custom-set-variables~ and into the respective package section of this file.
 
-** Legacy ensure packages
-
-Here's a dump of all the packages I had installed through ELPA or MELPA via ~package-list-packages~, or in a hack no longer included. The following code will install the packages if they aren't already installed. *However* this can cause problems if the system dependencies are not already installed. Plus, I might not want all of these on every environment I install Emacs on.
-
-*Note* this is set to ~:tangle no~.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (setq package-list '(ag auto-complete-sage auto-yasnippet autopair cargo color-theme color-theme-sanityinc-tomorrow company-racer dumb-jump editorconfig eglot ein-mumamo ein auto-complete elpy company exec-path-from-shell fill-column-indicator find-file-in-project flycheck-inline flycheck-rust flycheck flymake git-commit-mode helm-ag helm-projectile helm-sage helm-system-packages helm helm-core highlight-indentation htmlize ido-hacks ido-vertical-mode ivy json-mode json-reformat json-snatcher jsonrpc magit git-commit magit-popup material-theme mmm-mode multiple-cursors ob-ipython dash-functional org org-ehtml php-mode popup project-explorer es-windows es-lib pyvenv racer pos-tip request rust-mode rust-playground rustic markdown-mode projectile pkg-info epl f dash s sage-shell-mode deferred shell-switcher skewer-mode js2-mode simple-httpd spinner sr-speedbar switch-window tabbar telephone-line use-package bind-key web-server websocket with-editor async xterm-color yaml-mode yasnippet))
-
-  (unless package-archive-contents
-    (package-refresh-contents))
-  (dolist (package package-list)
-    (unless (package-installed-p package)
-      (package-install package)))
-#+END_SRC
-
 ** Programming utilities
 
 General programming utility packages with no system dependencies.
@@ -1104,7 +1088,21 @@ GNUPlot can be pretty handy, but I don't use it very often.
   (global-set-key [(f9)] 'gnuplot-make-buffer)
 #+END_SRC
 
+* Legacy ensure packages
 
+Here's a dump of all the packages I had installed through ELPA or MELPA via ~package-list-packages~, or in a hack no longer included. The following code will install the packages if they aren't already installed. *However* this can cause problems if the system dependencies are not already installed. Plus, I might not want all of these on every environment I install Emacs on.
+
+*Note* this is set to ~:tangle no~.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (setq package-list '(ag auto-complete-sage auto-yasnippet autopair cargo color-theme color-theme-sanityinc-tomorrow company-racer dumb-jump editorconfig eglot ein-mumamo ein auto-complete elpy company exec-path-from-shell fill-column-indicator find-file-in-project flycheck-inline flycheck-rust flycheck flymake git-commit-mode helm-ag helm-projectile helm-sage helm-system-packages helm helm-core highlight-indentation htmlize ido-hacks ido-vertical-mode ivy json-mode json-reformat json-snatcher jsonrpc magit git-commit magit-popup material-theme mmm-mode multiple-cursors ob-ipython dash-functional org org-ehtml php-mode popup project-explorer es-windows es-lib pyvenv racer pos-tip request rust-mode rust-playground rustic markdown-mode projectile pkg-info epl f dash s sage-shell-mode deferred shell-switcher skewer-mode js2-mode simple-httpd spinner sr-speedbar switch-window tabbar telephone-line use-package bind-key web-server websocket with-editor async xterm-color yaml-mode yasnippet))
+
+  (unless package-archive-contents
+    (package-refresh-contents))
+  (dolist (package package-list)
+    (unless (package-installed-p package)
+      (package-install package)))
+#+END_SRC
 
 * Conclusion
 
