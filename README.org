@@ -614,14 +614,8 @@ General programming utility packages with no system dependencies.
 #+BEGIN_SRC emacs-lisp
   ;;; Programming utilities
   ;;  ----------------------------------------------------------------------------
-
-  ;; Smartparens - keep parentheses balanced (from Jamie's)
-  (use-package smartparens
-    :diminish smartparens-mode
-    :config
-    (add-hook 'prog-mode-hook 'smartparens-mode))
-
   ;; Highlight nested parentheses (from Jamie's)
+
   (use-package rainbow-delimiters
     :config
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
@@ -717,6 +711,17 @@ General programming utility packages with no system dependencies.
                ("u" . sx-tab-unanswered-my-tags)
                ("a" . sx-ask)
                ("s" . sx-search)))
+#+END_SRC
+
+Not using this (using ~autopair~ instead).
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; Smartparens - keep parentheses balanced (from Jamie's)
+  (use-package smartparens
+    :diminish smartparens-mode
+    :config
+    (add-hook 'prog-mode-hook 'smartparens-mode))
+
 #+END_SRC
 
 *** Slack
