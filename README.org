@@ -64,7 +64,7 @@ Stuff to do during startup.
 
 ** Package init with any custom load-path
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Initialize
   ;;  -----------------------------------------------------------------------------
 
@@ -81,7 +81,7 @@ Stuff to do during startup.
 
 Elpa (GNU) is the default, but I add it anyway. Disabling ~package-enable-at-startup~ is SOP to make startup a little quicker.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (setq package-check-signature nil)  ; because GNU ELPA keeps choking on the sigs
   (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
@@ -92,7 +92,7 @@ Elpa (GNU) is the default, but I add it anyway. Disabling ~package-enable-at-sta
 
 Fire up ~use-package~, configured so that it will install and compile any missing dependencies on load.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Bootstrap use-package
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
@@ -109,7 +109,7 @@ Fire up ~use-package~, configured so that it will install and compile any missin
 
 This is a nice little tidbit copied directly from Jamie Collinson's config. Bumps startup speed.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (setq gc-cons-threshold 10000000)
 
   ;; Restore after startup
@@ -124,7 +124,7 @@ This is a nice little tidbit copied directly from Jamie Collinson's config. Bump
 
 Ensures environment variables in Emacs are the same as user shell.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Get user PATH
   (use-package exec-path-from-shell
     :config
@@ -140,7 +140,7 @@ All the miscellaneous tweaks that customize Emacs just the way I like it. Much o
 
 Obviously you'll want to edit the following, unless you are me:
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Preferences
   ;;  ----------------------------------------------------------------------------
 
@@ -150,21 +150,21 @@ Obviously you'll want to edit the following, unless you are me:
 
 ** Short "yes" and "no"
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Ask "y" or "n" instead of "yes" or "no". Yes, laziness is great.
   (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 
 ** Parentheses configuration
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Highlight corresponding parentheses when cursor is on one
   (show-paren-mode t)
 #+END_SRC
 
 ** Clean up whitespace
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Remove useless whitespace before saving a file
   (setq-default nuke-trailing-whitespace-p t)
   (add-hook 'before-save-hook 'whitespace-cleanup)
@@ -175,14 +175,14 @@ Obviously you'll want to edit the following, unless you are me:
 
 Saved me many a time. No more having to say "no" on save because the file on disk has changed since I started editing it.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
 ;; Auto-revert to disk on file change
 (global-auto-revert-mode t)
 #+END_SRC
 
 ** Set UTF-8 locale defaults
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Set locale to UTF8
   (set-language-environment 'utf-8)
   (set-terminal-coding-system 'utf-8)
@@ -196,7 +196,7 @@ Saved me many a time. No more having to say "no" on save because the file on dis
 
 Because, yuck!
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; hide DOS ^M line-endings
   (defun remove-dos-eol ()
     "Do not show ^M in files containing mixed UNIX and DOS line endings."
@@ -210,7 +210,7 @@ Because, yuck!
 
 Couple items here taken from "Dave's .emacs" (marked DHA)
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; truncate shell buffer to 1024 - comint-buffer-maximum-size
   (setq comint-buffer-maximum-size 2048)
   (add-hook 'comint-output-filter-functions
@@ -235,7 +235,7 @@ Couple items here taken from "Dave's .emacs" (marked DHA)
 
 ** Better file buffer
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Make ibuffer default instead of list-buffers
   (defalias 'list-buffers 'ibuffer)
 #+END_SRC
@@ -244,7 +244,7 @@ Couple items here taken from "Dave's .emacs" (marked DHA)
 
 This one is copied directly from Sacha Chua's config:
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Better history
   (setq savehist-file "~/.emacs.d/savehist")
   (savehist-mode 1)
@@ -261,7 +261,7 @@ This one is copied directly from Sacha Chua's config:
 
 I used to just disable backup files (very annoying in production environments), but this solution is far more elegant. Both Sacha and Jamie do something like this to keep backups in a separate location.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;; Keep backup files in their own directory
   (setq backup-directory-alist '(("." . "~/.emacs.d/backups"))
         backup-by-copying 1
@@ -286,7 +286,7 @@ In case I want to go back to no backups, I move the ~:tangle no~ to the previous
 
 Couple items here taken from "Daves .emacs", and some were lifted out of my old ~custom-set-variables~.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Interface
   ;;  ----------------------------------------------------------------------------
 
@@ -327,7 +327,7 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
 
 Because I've been using these for so long I don't even know what they are anymore.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Dave's .emacs
   ;;  UNM version, hacked down for student distribution
   ;;  ----------------------------------------------------------------------------
@@ -378,7 +378,7 @@ Because I've been using these for so long I don't even know what they are anymor
 
 SanityInc used to be my go-to, but I'm trying out Material for a while.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Appearance
   ;;  ----------------------------------------------------------------------------
 
@@ -433,7 +433,7 @@ Some basic ~org-mode~ preferences. Mostly vanilla, except I like ~visual-line-mo
 
 Oh yeah, and have to completely override ~org-html-fontify-code~ for export to work with ~fci-mode~, or get a bunch of weird extraneous characters on newline. See [[https://www.reddit.com/r/emacs/comments/2b5x5g/funny_characters_appended_at_new_line_to_source/][this thread]].
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Org-mode
   ;;  ----------------------------------------------------------------------------
 
@@ -564,7 +564,7 @@ Some functions that I have found handy at one point or another, and somehow made
 
 Very handy when you want to search-and-replace a lot of pairs in one go.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Custom functions
   ;;  ----------------------------------------------------------------------------
 
@@ -622,7 +622,7 @@ General programming utility packages with no system dependencies.
 
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Programming utilities
   ;;  ----------------------------------------------------------------------------
 
@@ -645,10 +645,8 @@ General programming utility packages with no system dependencies.
   ;; Flycheck
   (use-package flycheck
     :config
-    (global-flycheck-mode))
-  (use-package flycheck-inline
-    :config
-    (add-hook 'flycheck-mode-hook #'turn-on-flycheck-inline))
+    (use-package flycheck-inline
+      :hook (flycheck-mode . turn-on-flycheck-inline)))
 
   ;; Highlight-symbol TODO CHECK ME
   (use-package highlight-symbol
@@ -741,7 +739,7 @@ See [[https://github.com/yuya373/emacs-slack][here]] for config details. Untangl
 
 Projectile + Helm + IDO.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Navigation and projects
   ;;  ----------------------------------------------------------------------------
 
@@ -789,7 +787,7 @@ Projectile + Helm + IDO.
 
 I like ~tabbar~ but it doesn't play nice with ~use-package~! So install it from MELPA and customize the GUI way (ugh). Then the following can be added to group tabs by ~git~ project.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   (require 'tabbar)
   (tabbar-mode 1)
 
@@ -814,7 +812,7 @@ Language-specific packages and configuration.
 
 *** Emacs-Lisp
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Emacs-Lisp
   ;;  ----------------------------------------------------------------------------
 
@@ -823,7 +821,7 @@ Language-specific packages and configuration.
 
 *** PHP and HTML
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; PHP and HTML
   ;;  ----------------------------------------------------------------------------
 
@@ -854,7 +852,7 @@ Language-specific packages and configuration.
 
 I use the iPython3 interpreter, so make sure it's installed.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Python
   ;;  ----------------------------------------------------------------------------
 
@@ -865,20 +863,11 @@ I use the iPython3 interpreter, so make sure it's installed.
     :hook (python-mode . fci-mode)
     :config
     (use-package pyvenv))
-
-  ;; Elpy makes Emacs a full Python IDE. Do I want that? I dunno yet. Guess I'll try it...
-  (use-package py-autopep8)
-  (use-package elpy
-    :init (setq python-shell-interpreter "ipython"
-                python-shell-interpreter-args "-i")
-    :hook (elpy-mode . py-autopep8-enable-on-save)
-    :config
-    (elpy-enable))
 #+END_SRC
 
 *** Markdown
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Markdown (from Jamie's)
   ;;  ----------------------------------------------------------------------------
 
@@ -892,7 +881,7 @@ I use the iPython3 interpreter, so make sure it's installed.
 
 *** JSON
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
 ;;; JSON
 ;;  ----------------------------------------------------------------------------
 
@@ -903,7 +892,7 @@ I use the iPython3 interpreter, so make sure it's installed.
 
 *** XML
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; XML
   ;;  ----------------------------------------------------------------------------
 
@@ -935,7 +924,7 @@ I use the iPython3 interpreter, so make sure it's installed.
 
 *** Yaml
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp
   ;;; Yaml
   ;;  ----------------------------------------------------------------------------
 
