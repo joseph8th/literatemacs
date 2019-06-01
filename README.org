@@ -290,6 +290,10 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
   ;;; Interface
   ;;  ----------------------------------------------------------------------------
 
+  ;; Scroll-bar? What's that?
+  (when (display-graphic-p)
+    (set-scroll-bar-mode nil))
+
   ;; Fullscreen maximized frame in GUI mode
   (modify-all-frames-parameters '((fullscreen . maximized)))
 
@@ -316,7 +320,7 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
   ;; (split-window-right)
 
   ;; [DHA] Show the time in the mode line
-  (display-time)                              ; how late am I?
+  ;; (display-time)                              ; how late am I?
 
   ;; [DHA] Don't show the 'startup screen'
   (setq inhibit-startup-message t)            ; ok I've seen the copyleft &c
@@ -426,135 +430,6 @@ SanityInc used to be my go-to, but I'm trying out Material for a while.
   (add-to-list 'default-frame-alist '(ns-appearance . dark))
 #+END_SRC
 
-** Org-mode
-
-Some basic ~org-mode~ preferences. Mostly vanilla, except I like ~visual-line-mode~ for org files.
-
-Oh yeah, and have to completely override ~org-html-fontify-code~ for export to work with ~fci-mode~, or get a bunch of weird extraneous characters on newline. See [[https://www.reddit.com/r/emacs/comments/2b5x5g/funny_characters_appended_at_new_line_to_source/][this thread]].
-
-#+BEGIN_SRC emacs-lisp
-  ;;; Org-mode
-  ;;  ----------------------------------------------------------------------------
-
-  ;; Get htmlize
-  (use-package htmlize)
-
-  ;; Want a more local copy of org-mode so that I can override stuff if I want
-  (use-package org
-    :mode ("\\.org\\'" . org-mode)
-    :hook ((org-mode . visual-line-mode)
-           (org-mode . org-indent-mode))
-    :config
-    (setq org-todo-keywords
-          '((sequence "TODO" "DEV" "READY" "QA" "FAILED" "|" "DONE" "CLOSED")))
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((shell . t)
-       (python . t)
-       (ditaa . t)
-       )))
-
-  ;; Patch ox-html.el org-html-fontify-code to avoid weird newline chars with fci-mode
-  (eval-after-load "ox-html"
-    '(defun org-html-fontify-code (code lang)
-       "Color CODE with htmlize library.
-  CODE is a string representing the source code to colorize.  LANG
-  is the language used for CODE, as a string, or nil."
-       (when code
-         (cond
-          ;; No language.  Possibly an example block.
-          ((not lang) (org-html-encode-plain-text code))
-          ;; Plain text explicitly set.
-          ((not org-html-htmlize-output-type) (org-html-encode-plain-text code))
-          ;; No htmlize library or an inferior version of htmlize.
-          ((not (and (or (require 'htmlize nil t)
-                         (error "Please install htmlize from \
-  https://github.com/hniksic/emacs-htmlize"))
-                     (fboundp 'htmlize-region-for-paste)))
-           ;; Emit a warning.
-           (message "Cannot fontify src block (htmlize.el >= 1.34 required)")
-           (org-html-encode-plain-text code))
-          (t
-           ;; Map language
-           (setq lang (or (assoc-default lang org-src-lang-modes) lang))
-           (let* ((lang-mode (and lang (intern (format "%s-mode" lang)))))
-             (cond
-              ;; Case 1: Language is not associated with any Emacs mode
-              ((not (functionp lang-mode))
-               (org-html-encode-plain-text code))
-              ;; Case 2: Default.  Fontify code.
-              (t
-               ;; htmlize
-               (setq code
-                     (let ((output-type org-html-htmlize-output-type)
-                           (font-prefix org-html-htmlize-font-prefix))
-                       (with-temp-buffer
-                         ;; Switch to language-specific mode.
-                         (funcall lang-mode)
-
-                         ;; BEGIN PATCH: fix fci-mode export
-                         (when (require 'fill-column-indicator nil 'noerror)
-                           (fci-mode -1))
-                         ;; END PATCH
-
-                         (insert code)
-                         ;; Fontify buffer.
-                         (org-font-lock-ensure)
-                         ;; Remove formatting on newline characters.
-                         (save-excursion
-                           (let ((beg (point-min))
-                                 (end (point-max)))
-                             (goto-char beg)
-                             (while (progn (end-of-line) (< (point) end))
-                               (put-text-property (point) (1+ (point)) 'face nil)
-                               (forward-char 1))))
-                         (org-src-mode)
-                         (set-buffer-modified-p nil)
-                         ;; Htmlize region.
-                         (let ((org-html-htmlize-output-type output-type)
-                               (org-html-htmlize-font-prefix font-prefix))
-                           (org-html-htmlize-region-for-paste
-                            (point-min) (point-max))))))
-               ;; Strip any enclosing <pre></pre> tags.
-               (let* ((beg (and (string-match "\\`<pre[^>]*>\n?" code) (match-end 0)))
-                      (end (and beg (string-match "</pre>\\'" code))))
-                 (if (and beg end) (substring code beg end) code)))))))))
-    )
-#+END_SRC
-
-For my ~oporg~ project (WIP), so not tangled by default.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  ;;; oporg - Settings and convenience for oporg and org-ehtml
-  ;;  ----------------------------------------------------------------------------
-
-  ;; TODO (use-package request)
-  ;; (use-package web-server)
-  ;; (use-package websocket)
-  (use-package org-ehtml
-    :init
-    (setq org-ehtml-docroot (expand-file-name "~/public_org"))
-    (setq org-ehtml-everything-editable t))
-
-  (defun public-org-start (approot port)
-    "Prompts for APPROOT and PORT to the run the web-server."
-    (interactive
-     (list
-      (read-string
-       (format "Path to app root (%s): " org-ehtml-docroot)
-       nil nil org-ehtml-docroot)
-      (read-string
-       (format "Port to run the web-server on (%d): " 8888)
-       nil nil 8888)
-      ))
-    (setq org-ehtml-docroot (expand-file-name approot))
-    (ws-start org-ehtml-handler port))
-
-  (defun public-org-stop ()
-    (interactive)
-    (ws-stop-all))
-#+END_SRC
-
 * Custom Functions
 
 Some functions that I have found handy at one point or another, and somehow made their way into my ~init.el~.
@@ -591,29 +466,40 @@ Very handy when you want to search-and-replace a lot of pairs in one go.
 
 I've grouped these so that packages with system dependencies can be ignored by adding ~:tangle no~. Using ~use-package~ obliviates the need for a separate install/ensure and configuration steps, but spreads it out more. A lot of these packages were originally installed using ~package-list-packages~, so the configuration had to be moved out of ~custom-set-variables~ and into the respective package section of this file.
 
-** Legacy ensure packages
+** Websocket and Webserver
 
-Here's a dump of all the packages I had installed through ELPA or MELPA via ~package-list-packages~, or in a hack no longer included. The following code will install the packages if they aren't already installed. *However* this can cause problems if the system dependencies are not already installed. Plus, I might not want all of these on every environment I install Emacs on.
+Several later items need these, so let's just always require them.
 
-*Note* this is set to ~:tangle no~.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (setq package-list '(ag auto-complete-sage auto-yasnippet autopair cargo color-theme color-theme-sanityinc-tomorrow company-racer dumb-jump editorconfig eglot ein-mumamo ein auto-complete elpy company exec-path-from-shell fill-column-indicator find-file-in-project flycheck-inline flycheck-rust flycheck flymake git-commit-mode helm-ag helm-projectile helm-sage helm-system-packages helm helm-core highlight-indentation htmlize ido-hacks ido-vertical-mode ivy json-mode json-reformat json-snatcher jsonrpc magit git-commit magit-popup material-theme mmm-mode multiple-cursors ob-ipython dash-functional org org-ehtml php-mode popup project-explorer es-windows es-lib pyvenv racer pos-tip request rust-mode rust-playground rustic markdown-mode projectile pkg-info epl f dash s sage-shell-mode deferred shell-switcher skewer-mode js2-mode simple-httpd spinner sr-speedbar switch-window tabbar telephone-line use-package bind-key web-server websocket with-editor async xterm-color yaml-mode yasnippet))
-
-  (unless package-archive-contents
-    (package-refresh-contents))
-  (dolist (package package-list)
-    (unless (package-installed-p package)
-      (package-install package)))
+#+BEGIN_SRC emacs-lisp
+  ;; Websocket, webserver, and request
+  (use-package websocket)
+  (use-package web-server)
+  (use-package request)
 #+END_SRC
 
 ** Programming utilities
 
 General programming utility packages with no system dependencies.
 
+*** EditorConfig Integration
+
+Because setting indents for each language is a PITA.
+
 #+BEGIN_SRC emacs-lisp
   ;;; Programming utilities
   ;;  ----------------------------------------------------------------------------
+
+  ;; Editorconfig
+  (use-package editorconfig
+    :config
+    (editorconfig-mode 1))
+#+END_SRC
+
+*** Prettify Stuff
+
+Rainbow colored nested parens, etc. Colorified color references. Fill column indicator.
+
+#+BEGIN_SRC emacs-lisp
   ;; Highlight nested parentheses (from Jamie's)
 
   (use-package rainbow-delimiters
@@ -630,23 +516,30 @@ General programming utility packages with no system dependencies.
   (use-package fill-column-indicator
     :init
     (setq-default fci-rule-column 80))
+#+END_SRC
 
-  ;; Flycheck
+*** Syntax Checking and Completion
+
+There's about 90 billion different ways to do these things. I'm still figuring out the best way for me.
+
+#+BEGIN_SRC emacs-lisp
+  ;; Company support - text completion
+  (use-package company)
+
+  ;; Flycheck (add to mode hooks per language)
   (use-package flycheck
     :config
-    (global-flycheck-mode))
-  (use-package flycheck-inline
-    :config
-    (add-hook 'flycheck-mode-hook #'turn-on-flycheck-inline))
+    (use-package flycheck-inline
+      :hook (flycheck-mode-hook . turn-on-flycheck-inline)))
 
-  ;; Highlight-symbol TODO CHECK ME
+  ;; Highlight-symbol
   (use-package highlight-symbol
     :bind (([(control f3)] . highlight-symbol-at-point)
            ([f3] . highlight-symbol-next)
            ([(shift f3)] . highlight-symbol-prev)
            ([(meta f3)] . highlight-symbol-query-replace)))
 
-  ;; Auto-complete
+  ;; Auto-complete (TODO: enable ac-company?)
   (use-package auto-complete
     :init
     (require 'auto-complete-config)
@@ -659,14 +552,6 @@ General programming utility packages with no system dependencies.
     :config
     (autopair-global-mode))
 
-  ;; Multiple-cursors
-  (use-package multiple-cursors
-    :bind (("C-S-c C-S-c" . mc/edit-lines)
-           ("C->" . mc/mark-next-like-this)
-           ("C-<" . mc/mark-previous-like-this)
-           ("C-c C-<" . mc/mark-all-like-this)
-           ("C-S-<mouse-1>" . mc/add-cursor-on-click)))
-
   ;; Yasnippet
   (use-package yasnippet
     :init
@@ -678,44 +563,46 @@ General programming utility packages with no system dependencies.
                 ("C-j" . yas-next-field))
     :config
     (yas-global-mode 1))
+#+END_SRC
 
+*** Magit
+
+Don't use it as often as I should. Old habits and all that.
+
+#+BEGIN_SRC emacs-lisp
   ;; Magit, of course
   (use-package magit
     :bind (("C-x g" . magit-status))
     :config
     (use-package magit-popup))
+#+END_SRC
 
-  ;; Editorconfig
-  (use-package editorconfig
-    :config
-    (editorconfig-mode 1))
+*** Helpful utilities
+
+Multiple cursor support. Faster grepping. A REST client (bye-bye Postman).
+
+#+BEGIN_SRC emacs-lisp
+  ;; Multiple-cursors
+  (use-package multiple-cursors
+    :bind (("C-S-c C-S-c" . mc/edit-lines)
+           ("C->" . mc/mark-next-like-this)
+           ("C-<" . mc/mark-previous-like-this)
+           ("C-c C-<" . mc/mark-all-like-this)
+           ("C-S-<mouse-1>" . mc/add-cursor-on-click)))
 
   ;; Silversearcher support - faster-than-grep
   (use-package ag)
 
-  ;; Company support - text completion
-  (use-package company)
-
   ;; REST Client in Emacs? But of course!
   (use-package restclient)
-
-  ;; SO in Emacs? Uh-huh. (Thx Jamie)
-  (use-package sx
-    :config
-    (bind-keys :prefix "C-c s"
-               :prefix-map my-sx-map
-               :prefix-docstring "Global keymap for SX."
-               ("q" . sx-tab-all-questions)
-               ("i" . sx-inbox)
-               ("o" . sx-open-link)
-               ("u" . sx-tab-unanswered-my-tags)
-               ("a" . sx-ask)
-               ("s" . sx-search)))
 #+END_SRC
 
-Not using this (using ~autopair~ instead).
+*** Smart parentheses
+
+*Untangled by default.* Using ~autopair~ instead.
 
 #+BEGIN_SRC emacs-lisp :tangle no
+
   ;; Smartparens - keep parentheses balanced (from Jamie's)
   (use-package smartparens
     :diminish smartparens-mode
@@ -723,19 +610,6 @@ Not using this (using ~autopair~ instead).
     (add-hook 'prog-mode-hook 'smartparens-mode))
 
 #+END_SRC
-
-*** Slack
-
-Yes, *that* Slack.
-
-See [[https://github.com/yuya373/emacs-slack][here]] for config details. Untangled by default.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  ;; Slack in Emacs? Well, yeah!
-  (use-package slack
-    :commands (slack-start))
-#+END_SRC
-
 
 ** Navigation and projects
 
@@ -787,7 +661,7 @@ Projectile + Helm + IDO.
 
 *** TabBarMode (disabled)
 
-I like ~tabbar~ but it doesn't play nice with ~use-package~! So install it from MELPA and customize the GUI way (ugh). Then the following can be added to group tabs by ~git~ project.
+I like ~tabbar~ but it doesn't play nice with ~use-package~, so install it from MELPA and customize the GUI way (ugh). Then the following can be added to group tabs by ~git~ project.
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (defun find-git-dir (dir)
@@ -805,6 +679,103 @@ I like ~tabbar~ but it doesn't play nice with ~use-package~! So install it from 
   (setq tabbar-buffer-groups-function 'git-tabbar-buffer-groups)
 #+END_SRC
 
+**** TabBarMode Look & Feel (never tangle these)
+
+Add the following to ~custom-set-variables~ in the ~custom-settings.el~ (not advisable, normally, but works fine here).
+
+#+BEGIN_SRC emacs-lisp :tangle no
+ '(tabbar-mode t nil (tabbar))
+ '(tabbar-mwheel-mode t nil (tabbar))
+ '(tabbar-separator (quote (0.3)))
+#+END_SRC
+
+And the following to ~custom-set-faces~ for a flatter look.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+ '(tabbar-button ((t (:inherit tabbar-default))))
+ '(tabbar-default ((t (:inherit variable-pitch :background "gray50" :foreground "grey75" :height 0.8))))
+ '(tabbar-modified ((t (:inherit tabbar-default :background "gray40" :foreground "green"))))
+ '(tabbar-selected ((t (:inherit tabbar-default :background "gray30" :foreground "gray90"))))
+ '(tabbar-unselected ((t (:inherit tabbar-default :background "gray40"))))
+#+END_SRC
+
+** Integrations
+
+Access web resources and tools using Emacs as a client.
+
+*** StackExchange integration
+
+As in, search SO from inside Emacs.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Integrations
+  ;;  ----------------------------------------------------------------------------
+
+  ;; SO in Emacs? Uh-huh. (Thx Jamie)
+  (use-package sx
+    :config
+    (bind-keys :prefix "C-c s"
+               :prefix-map my-sx-map
+               :prefix-docstring "Global keymap for SX."
+               ("q" . sx-tab-all-questions)
+               ("i" . sx-inbox)
+               ("o" . sx-open-link)
+               ("u" . sx-tab-unanswered-my-tags)
+               ("a" . sx-ask)
+               ("s" . sx-search)))
+#+END_SRC
+
+*** Slack integration
+
+Yes, *that* Slack.
+
+*Untangled by default.* See [[https://github.com/yuya373/emacs-slack][here]] for config details.
+
+FIRST put your private credentials in a file like ~.emacs.d/slack-creds.el~ filling out the following (do NOT ever tangle this block, it's just an example):
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; Example ONLY
+  (setq my-slack-credentials
+        '((name "ACCOUNT")
+          (client-id "XXXXXXXXXXXX.YYYYYYYYYYYYY")
+          (client-secret "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+          (token "xoxs-XXXXXXXXXXXX-AAAAAAAAAAAA-BBBBBBBBBBBB-CCCCCCCCCCCCCCCCCCC")
+          (subscribed-channels CHANNEL1 CHANNEL2 CHANNEL3)))
+#+END_SRC
+
+THEN tangle the following.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; Show desktop notifications
+  (use-package alert
+    :commands (alert)
+    :init
+    (setq alert-default-style 'notifier))
+
+  ;; An IRC client
+  (use-package circe)
+
+  ;; Show emojis in Emacs
+  (use-package emojify)
+
+  ;; Make SURE this file exists and is valid
+  (load ~/.emacs.d/slack-creds.el)
+
+  (use-package slack
+    :commands (slack-start)
+    :init
+    (setq slack-buffer-emojify t)
+    (setq slack-prefer-current-team t)
+    (slack-register-team
+     :name (mapconcat 'identity (alist-get 'name my-slack-credentials) " ")
+     :default t
+     :client-id (mapconcat 'identity (alist-get 'client-id my-slack-credentials) " ")
+     :client-secret (mapconcat 'identity (alist-get 'client-secret my-slack-credentials) " ")
+     :token (mapconcat 'identity (alist-get 'token my-slack-credentials) " ")
+     :subscribed-channels '(alist-get 'subscribed-channels my-slack-credentials)
+     :full-and-display-names t))
+#+END_SRC
+
 ** Language-specific
 
 Language-specific packages and configuration.
@@ -818,7 +789,39 @@ Language-specific packages and configuration.
   (add-hook 'emacs-lisp-mode-hook 'fci-mode)
 #+END_SRC
 
+*** Python
+
+I use the iPython3 interpreter, so make sure it's installed.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Python
+  ;;  ----------------------------------------------------------------------------
+
+  ;; Basic python-mode config. I've been using this for years with no problems.
+  (use-package python
+    :mode ("\\.py\\'" . python-mode)
+    :interpreter ("/usr/bin/ipython3" . python-mode)
+    :hook (python-mode . fci-mode)
+    :config
+    (use-package pyvenv))
+#+END_SRC
+
+Tried ~elpy~ and, honestly, it's overkill for me. I do like being able to execute regions in the interpreter, so I'm leaving it here to play with down the line. Maybe I'll change my mind.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; Elpy makes Emacs a full Python IDE. Do I want that? I dunno yet. Guess I'll try it...
+  (use-package py-autopep8)
+  (use-package elpy
+    :init (setq python-shell-interpreter "ipython"
+                python-shell-interpreter-args "-i --simple-prompt")
+    :hook (elpy-mode . py-autopep8-enable-on-save)
+    :config
+    (elpy-enable))
+#+END_SRC
+
 *** PHP and HTML
+
+Honestly, ~web-mode~ is the way to go with mixed language files.
 
 #+BEGIN_SRC emacs-lisp
   ;;; PHP and HTML
@@ -845,28 +848,6 @@ Language-specific packages and configuration.
                  (vector (current-column))))
              (c-set-offset 'arglist-intro 'ywb-php-lineup-arglist-intro)
              (c-set-offset 'arglist-close 'ywb-php-lineup-arglist-close)))))
-#+END_SRC
-
-*** Python
-
-I use the iPython3 interpreter, so make sure it's installed.
-
-#+BEGIN_SRC emacs-lisp
-  ;;; Python
-  ;;  ----------------------------------------------------------------------------
-
-  ;; Basic python-mode config. I've been using this for years with no problems.
-  (use-package python
-    :mode ("\\.py\\'" . python-mode)
-    :interpreter ("/usr/bin/ipython3" . python-mode)
-    :hook (python-mode . fci-mode)
-    :config
-    (use-package pyvenv))
-
-  ;; Elpy makes Emacs a full Python IDE. Do I want that? I dunno yet. Guess I'll try it...
-  (use-package elpy
-    :config
-    (elpy-enable))
 #+END_SRC
 
 *** Markdown
@@ -965,7 +946,7 @@ See [[https://millejoh.github.io/emacs-ipython-notebook/][EIN]] for requirements
 
 There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ to work, so the init code for those sections are not tangled by default.
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   ;;; Rust
   ;;  TODO: change all 'add-hook' to use use-package 'hook:'
   ;;  ----------------------------------------------------------------------------
@@ -1077,12 +1058,217 @@ GNUPlot can be pretty handy, but I don't use it very often.
   (global-set-key [(f9)] 'gnuplot-make-buffer)
 #+END_SRC
 
+** PDF-Tools
 
+Next level PDF viewer, editor.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; PDF-Tools
+  ;;  ----------------------------------------------------------------------------
+
+  (use-package pdf-tools
+    :pin manual ;; manually update
+    :config
+    ;; initialise
+    (pdf-tools-install)
+    ;; open pdfs scaled to fit page
+    (setq-default pdf-view-display-size 'fit-page)
+    ;; automatically annotate highlights
+    (setq pdf-annot-activate-created-annotations t)
+    ;; use normal isearch
+    (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward))
+#+END_SRC
+
+** Org-mode
+
+Some basic ~org-mode~ preferences. Mostly vanilla, except I like ~visual-line-mode~ for org files.
+
+Oh yeah, and have to completely override ~org-html-fontify-code~ for export to work with ~fci-mode~, or get a bunch of weird extraneous characters on newline. See [[https://www.reddit.com/r/emacs/comments/2b5x5g/funny_characters_appended_at_new_line_to_source/][this thread]].
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Org-mode
+  ;;  ----------------------------------------------------------------------------
+
+  ;; Get htmlize
+  (use-package htmlize)
+
+  ;; Want a more local copy of org-mode so that I can override stuff if I want
+  (use-package org
+    :mode ("\\.org\\'" . org-mode)
+    :hook ((org-mode . visual-line-mode)
+           (org-mode . org-indent-mode))
+    :config
+    (setq org-todo-keywords
+          '((sequence "TODO" "DEV" "READY" "QA" "FAILED" "|" "DONE" "CLOSED")))
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((shell . t)
+       (python . t)
+       (ditaa . t)
+       )))
+
+  ;; Want to ignore headlines but not section contents if :ignore: added
+  ;(use-package titletoc)
+  ;(require 'ox-extra)
+  ;(ox-extras-activate '(ignore-headlines)
+
+  ;; Patch ox-html.el org-html-fontify-code to avoid weird newline chars with fci-mode
+  (eval-after-load "ox-html"
+    '(defun org-html-fontify-code (code lang)
+       "Color CODE with htmlize library.
+  CODE is a string representing the source code to colorize.  LANG
+  is the language used for CODE, as a string, or nil."
+       (when code
+         (cond
+          ;; No language.  Possibly an example block.
+          ((not lang) (org-html-encode-plain-text code))
+          ;; Plain text explicitly set.
+          ((not org-html-htmlize-output-type) (org-html-encode-plain-text code))
+          ;; No htmlize library or an inferior version of htmlize.
+          ((not (and (or (require 'htmlize nil t)
+                         (error "Please install htmlize from \
+  https://github.com/hniksic/emacs-htmlize"))
+                     (fboundp 'htmlize-region-for-paste)))
+           ;; Emit a warning.
+           (message "Cannot fontify src block (htmlize.el >= 1.34 required)")
+           (org-html-encode-plain-text code))
+          (t
+           ;; Map language
+           (setq lang (or (assoc-default lang org-src-lang-modes) lang))
+           (let* ((lang-mode (and lang (intern (format "%s-mode" lang)))))
+             (cond
+              ;; Case 1: Language is not associated with any Emacs mode
+              ((not (functionp lang-mode))
+               (org-html-encode-plain-text code))
+              ;; Case 2: Default.  Fontify code.
+              (t
+               ;; htmlize
+               (setq code
+                     (let ((output-type org-html-htmlize-output-type)
+                           (font-prefix org-html-htmlize-font-prefix))
+                       (with-temp-buffer
+                         ;; Switch to language-specific mode.
+                         (funcall lang-mode)
+
+                         ;; BEGIN PATCH: fix fci-mode export
+                         (when (require 'fill-column-indicator nil 'noerror)
+                           (fci-mode -1))
+                         ;; END PATCH
+
+                         (insert code)
+                         ;; Fontify buffer.
+                         (org-font-lock-ensure)
+                         ;; Remove formatting on newline characters.
+                         (save-excursion
+                           (let ((beg (point-min))
+                                 (end (point-max)))
+                             (goto-char beg)
+                             (while (progn (end-of-line) (< (point) end))
+                               (put-text-property (point) (1+ (point)) 'face nil)
+                               (forward-char 1))))
+                         (org-src-mode)
+                         (set-buffer-modified-p nil)
+                         ;; Htmlize region.
+                         (let ((org-html-htmlize-output-type output-type)
+                               (org-html-htmlize-font-prefix font-prefix))
+                           (org-html-htmlize-region-for-paste
+                            (point-min) (point-max))))))
+               ;; Strip any enclosing <pre></pre> tags.
+               (let* ((beg (and (string-match "\\`<pre[^>]*>\n?" code) (match-end 0)))
+                      (end (and beg (string-match "</pre>\\'" code))))
+                 (if (and beg end) (substring code beg end) code)))))))))
+    )
+#+END_SRC
+
+For my ~oporg~ project (WIP), so not tangled by default.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; oporg - Settings and convenience for oporg and org-ehtml
+  ;;  ----------------------------------------------------------------------------
+
+  (use-package org-ehtml
+    :init
+    (setq org-ehtml-docroot (expand-file-name "~/public_org"))
+    (setq org-ehtml-everything-editable t))
+
+  (defun public-org-start (approot port)
+    "Prompts for APPROOT and PORT to the run the web-server."
+    (interactive
+     (list
+      (read-string
+       (format "Path to app root (%s): " org-ehtml-docroot)
+       nil nil org-ehtml-docroot)
+      (read-string
+       (format "Port to run the web-server on (%d): " 8888)
+       nil nil 8888)
+      ))
+    (setq org-ehtml-docroot (expand-file-name approot))
+    (ws-start org-ehtml-handler port))
+
+  (defun public-org-stop ()
+    (interactive)
+    (ws-stop-all))
+#+END_SRC
+
+** Writing mode
+
+Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For creative writing.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Writing mode
+  ;;  ----------------------------------------------------------------------------
+
+  (use-package writeroom-mode)
+
+  (defun writing-mode ()
+    (interactive)
+    (setq buffer-face-mode-face '(:family "dejavu sans mono" :height 140))
+    (buffer-face-mode)
+    (linum-mode 0)
+    (writeroom-mode 1)
+    (blink-cursor-mode)
+    (visual-line-mode 1)
+    (setq truncate-lines nil)
+    (setq-default line-spacing 5)
+    (setq global-hl-line-mode nil)
+    )
+
+  ;;; Standard Manuscript Format using LaTeX sffms package
+  ;;  ----------------------------------------------------------------------------
+  ;; org mode latex standard manuscript formats
+  ;; https://chrismaiorana.com/org-mode-standard-manuscript-format/
+  ;;
+  ;; For your org file heading
+  ;; #+LaTeX_CLASS: novel (or, short, whichever)
+  ;; #+LATEX_HEADER: \runningtitle{Shortened Title}
+  ;; #+LATEX_HEADER: \wordcount{?}
+
+  (require 'ox-latex)
+  (unless (boundp 'org-latex-classes)
+    (setq org-latex-classes nil))
+  (add-to-list 'org-latex-classes
+               '("novel"
+                 "\\documentclass[novel,geometry,letterpaper,courier]{sffms}
+                  \\surname{Edwards}
+                  \\address{7770 SW 90th St., J-10\u005C\u005C Miami, FL\u005C\u005C jedward8th@gmail.com}
+                  \\disposable
+                  \\usepackage{hyperref}
+                 [NO-DEFAULT-PACKAGES]
+                 [NO-PACKAGES]"
+                 ("\\chapter*{%s}")
+                 ("\\chapter*{%s}")
+                 ("\\chapter*{%s}")
+                 ("%s")
+                 ))
+
+  ;; (setq org-latex-with-hyperref nil)
+  ;; (setq org-latex-pdf-process '("pdflatex  %f"))
+#+END_SRC
 
 * Conclusion
 
 Tangles on save.
 
 ;; Local Variables:
-;; eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
+;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t)
 ;; End:
