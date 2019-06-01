@@ -1,9 +1,9 @@
 #+TITLE: Joseph8th's Emacs Init
 #+AUTHOR: Joseph Edwards VIII
 #+EMAIL: jedwards8th at gmail.com
-#+DATE: 2019-01-27
+#+DATE: 2019-02-08
 #+STARTUP: showall indent
-#+PROPERTY: header-args :results silent :tangle "init.el"
+#+PROPERTY: header-args :results silent :tangle "./init.el"
 
 * Introduction
 
@@ -311,7 +311,8 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
   (global-set-key (kbd "C-x o") 'switch-window)
 
   ;; Scroll-bar? What's that?
-  (set-scroll-bar-mode nil)
+  (when (display-graphic-p)
+    (set-scroll-bar-mode nil))
 
   ;; [DHA] I *never* use the stupid thing..
   ;; (menu-bar-mode -1)
@@ -664,6 +665,9 @@ Projectile + Helm + IDO.
 I like ~tabbar~ but it doesn't play nice with ~use-package~, so install it from MELPA and customize the GUI way (ugh). Then the following can be added to group tabs by ~git~ project.
 
 #+BEGIN_SRC emacs-lisp :tangle no
+  (require 'tabbar)
+  (tabbar-mode 1)
+
   (defun find-git-dir (dir)
     "Search up the directory tree looking for a .git folder."
     (cond
