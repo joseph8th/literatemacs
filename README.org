@@ -132,6 +132,16 @@ Ensures environment variables in Emacs are the same as user shell.
       (exec-path-from-shell-initialize)))
 #+END_SRC
 
+** Load custom init
+
+In case I want to only load configs for this machine, not keeping it in this file.
+
+#+BEGIN_SRC emacs-lisp
+  ;; Load custom init file?
+  (if (file-exists-p "~/.emacs.d/custom-init.el")
+      (load "~/.emacs.d/custom-init.el"))
+#+END_SRC
+
 * Preferences
 
 All the miscellaneous tweaks that customize Emacs just the way I like it. Much of this was taken from "Dave's .emacs" but the rest was just ad hoc.
@@ -385,7 +395,8 @@ SanityInc used to be my go-to, but I'm trying out Material for a while.
   ;; See: https://www.greghendershott.com/2017/02/emacs-themes.html
 
   ;; Extra dark BG with bright chars
-  (use-package color-theme-sanityinc-tomorrow)
+  (use-package color-theme-sanityinc-tomorrow
+    :defer t)
   ;; (load-theme 'sanityinc-tomorrow-bright)
 
   ;; Material design has lots of nice features (TODO: customize)
@@ -438,10 +449,12 @@ Oh yeah, and have to completely override ~org-html-fontify-code~ for export to w
   ;;  ----------------------------------------------------------------------------
 
   ;; Get htmlize
-  (use-package htmlize)
+  (use-package htmlize
+    :defer t)
 
   ;; Want a more local copy of org-mode so that I can override stuff if I want
   (use-package org
+    :defer t
     :mode ("\\.org\\'" . org-mode)
     :hook ((org-mode . visual-line-mode)
            (org-mode . org-indent-mode))
@@ -533,6 +546,7 @@ For my ~oporg~ project (WIP), so not tangled by default.
   ;; (use-package web-server)
   ;; (use-package websocket)
   (use-package org-ehtml
+    :defer t
     :init
     (setq org-ehtml-docroot (expand-file-name "~/public_org"))
     (setq org-ehtml-everything-editable t))
@@ -600,6 +614,7 @@ General programming utility packages with no system dependencies.
 
   ;; Smartparens - keep parentheses balanced (from Jamie's)
   (use-package smartparens
+    :defer t
     :diminish smartparens-mode
     :config
     (add-hook 'prog-mode-hook 'smartparens-mode))
@@ -628,11 +643,10 @@ General programming utility packages with no system dependencies.
 
   ;; Flycheck
   (use-package flycheck
+    :defer t
     :config
-    (global-flycheck-mode))
-  (use-package flycheck-inline
-    :config
-    (add-hook 'flycheck-mode-hook #'turn-on-flycheck-inline))
+    (use-package flycheck-inline
+      :hook (flycheck-mode . turn-on-flycheck-inline)))
 
   ;; Highlight-symbol TODO CHECK ME
   (use-package highlight-symbol
@@ -656,6 +670,7 @@ General programming utility packages with no system dependencies.
 
   ;; Multiple-cursors
   (use-package multiple-cursors
+    :defer t
     :bind (("C-S-c C-S-c" . mc/edit-lines)
            ("C->" . mc/mark-next-like-this)
            ("C-<" . mc/mark-previous-like-this)
@@ -664,6 +679,7 @@ General programming utility packages with no system dependencies.
 
   ;; Yasnippet
   (use-package yasnippet
+    :defer t
     :init
     (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
     :bind (:map yas-minor-mode-map
@@ -676,6 +692,7 @@ General programming utility packages with no system dependencies.
 
   ;; Magit, of course
   (use-package magit
+    :defer t
     :bind (("C-x g" . magit-status))
     :config
     (use-package magit-popup))
@@ -692,10 +709,11 @@ General programming utility packages with no system dependencies.
   (use-package company)
 
   ;; REST Client in Emacs? But of course!
-  (use-package restclient)
+  (use-package restclient :defer t)
 
   ;; SO in Emacs? Uh-huh. (Thx Jamie)
   (use-package sx
+    :defer t
     :config
     (bind-keys :prefix "C-c s"
                :prefix-map my-sx-map
@@ -717,6 +735,7 @@ See [[https://github.com/yuya373/emacs-slack][here]] for config details. Untangl
 #+BEGIN_SRC emacs-lisp :tangle no
   ;; Slack in Emacs? Well, yeah!
   (use-package slack
+    :defer t
     :commands (slack-start))
 #+END_SRC
 
@@ -831,14 +850,17 @@ Language-specific packages and configuration.
   ;;; PHP and HTML
   ;;  ----------------------------------------------------------------------------
 
-  (use-package web-mode)
+  (use-package web-mode
+    :defer t)
   (use-package mmm-mode
+    :defer t
     :init
     (setq mmm-global-mode 'maybe)
     :config
     (mmm-add-mode-ext-class 'html-mode "\\.php\\'" 'html-php))
 
   (use-package php-mode
+    :defer t
     :hook ((php-mode . editorconfig-mode)
            (php-mode . fci-mode)
            (php-mode . (lambda ()
@@ -864,20 +886,12 @@ I use the iPython3 interpreter, so make sure it's installed.
 
   ;; Basic python-mode config. I've been using this for years with no problems.
   (use-package python
+    :defer t
     :mode ("\\.py\\'" . python-mode)
     :interpreter ("/usr/bin/ipython3" . python-mode)
     :hook (python-mode . fci-mode)
     :config
     (use-package pyvenv))
-
-  ;; Elpy makes Emacs a full Python IDE. Do I want that? I dunno yet. Guess I'll try it...
-  (use-package py-autopep8)
-  (use-package elpy
-    :init (setq python-shell-interpreter "ipython"
-                python-shell-interpreter-args "-i --simple-prompt")
-    :hook (elpy-mode . py-autopep8-enable-on-save)
-    :config
-    (elpy-enable))
 #+END_SRC
 
 *** Markdown
@@ -887,6 +901,7 @@ I use the iPython3 interpreter, so make sure it's installed.
   ;;  ----------------------------------------------------------------------------
 
   (use-package markdown-mode
+    :defer t
     :commands (markdown-mode gfm-mode)
     :mode (("README\\.md\\'" . gfm-mode)
            ("\\.md\\'" . markdown-mode)
@@ -900,9 +915,12 @@ I use the iPython3 interpreter, so make sure it's installed.
 ;;; JSON
 ;;  ----------------------------------------------------------------------------
 
-(use-package json-mode)
-(use-package json-reformat)
-(use-package jsonrpc)
+(use-package json-mode
+  :defer t)
+(use-package json-reformat
+  :defer t)
+(use-package jsonrpc
+  :defer t)
 #+END_SRC
 
 *** XML
@@ -944,6 +962,7 @@ I use the iPython3 interpreter, so make sure it's installed.
   ;;  ----------------------------------------------------------------------------
 
   (use-package yaml-mode
+    :defer t
     :init
     (setq indent-tabs-mode nil)
     :mode "\\.yml\\'"
@@ -966,6 +985,7 @@ See [[https://millejoh.github.io/emacs-ipython-notebook/][EIN]] for requirements
   ;;  ----------------------------------------------------------------------------
 
   (use-package ein
+    :defer t
     :config
     (use-package ein-notebook)
     (use-package ein-subpackages)
@@ -990,8 +1010,10 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
     :init
     (add-hook 'rust-mode-hook 'fci-mode))
 
-  (use-package rustic)
+  (use-package rustic
+    :defer t)
   (use-package cargo
+    :defer t
     :init
     (add-hook 'rust-mode-hook 'cargo-minor-mode)
     (add-hook 'rust-mode-hook
@@ -1000,6 +1022,7 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
     (add-hook 'toml-mode-hook 'cargo-minor-mode))
 
   (use-package racer
+    :defer t
     :init
     (add-hook 'rust-mode-hook #'racer-mode)
     (add-hook 'racer-mode-hook #'eldoc-mode)
@@ -1012,6 +1035,7 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
 
   ;; Flycheck for Rust
   (use-package flycheck-rust
+    :defer t
     :init
     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+END_SRC
@@ -1024,7 +1048,8 @@ I don't use Go very often, so it's not tangled by default.
   ;;; Go
   ;;  ----------------------------------------------------------------------------
 
-  (use-package go-mode)
+  (use-package go-mode
+    :defer t)
 #+END_SRC
 
 **** Javascript
