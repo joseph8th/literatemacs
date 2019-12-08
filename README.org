@@ -301,8 +301,9 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
   ;;  ----------------------------------------------------------------------------
 
   ;; Scroll-bar? What's that?
-  (when (display-graphic-p)
-    (set-scroll-bar-mode nil))
+  ;; (when (display-graphic-p)
+  (set-scroll-bar-mode nil)
+  ;; )
 
   ;; Fullscreen maximized frame in GUI mode
   (modify-all-frames-parameters '((fullscreen . maximized)))
@@ -338,6 +339,9 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
 
   ;; [DHA] Don't show the 'startup screen'
   (setq inhibit-startup-message t)            ; ok I've seen the copyleft &c
+
+  ;; No alarm on C-g FFS!
+  (setq ring-bell-function 'ignore)
 #+END_SRC
 
 ** Dave's .emacs customizations
@@ -1138,7 +1142,7 @@ GNUPlot can be pretty handy, but I don't use it very often.
   (global-set-key [(f9)] 'gnuplot-make-buffer)
 #+END_SRC
 
-** PDF-Tools
+**** PDF-Tools
 
 Next level PDF viewer, editor.
 
@@ -1302,7 +1306,7 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
 
   (defun writing-mode ()
     (interactive)
-    (setq buffer-face-mode-face '(:family "dejavu sans mono" :height 140))
+    (setq buffer-face-mode-face '(:family "dejavu sans mono" :height 150))
     (buffer-face-mode)
     (linum-mode 0)
     (writeroom-mode 1)
