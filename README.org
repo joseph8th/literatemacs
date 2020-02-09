@@ -23,6 +23,8 @@ All of the *tangled* code in this ~README.org~ is Emacs Lisp, though there are s
 
 To stop Emacs from tangling a block of code, make sure the code block header looks like ~#+BEGIN_SRC :tangle no~
 
+For example, this block will be tangled first, at the top of your new ~init.el~:
+
 #+BEGIN_SRC
   ;;; init.el --- Emacs initialization file tangled from a README.org file
 
@@ -108,9 +110,9 @@ There are three ways to tangle this file:
 
 1. Use ~M-x org-babel-tangle~ (~C-c C-v t~).
 2. *Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~:
-#+BEGIN_SRC emacs-lisp :tangle no
-  (org-babel-tangle)
-#+END_SRC
+    #+BEGIN_SRC emacs-lisp :tangle no
+      (org-babel-tangle)
+    #+END_SRC
 3. *Or*, even better, just save and let the ~after-save-hook~, defined in the [[#conclusion][Conclusion]], do its thing.
 
 If you choose option #3, it will also ask you if you want to "Reload?" If this is your first run, that will still be your existing ~init.el~ file, not the new one being created for you. In that case, you may safely say "no" and continue to the next "Link" step
