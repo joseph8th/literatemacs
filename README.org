@@ -6,7 +6,7 @@
 #+STARTUP: showall indent
 #+PROPERTY: header-args :results silent :tangle "./init.el"
 
-*WORK-ALWAYS-IN-PROGRESS*
+*This file IS the program.*
 
 A literate README that produces an ~init.el~, personalized to my tastes. Relies on ~use-package~, and is based on the following resources:
 
