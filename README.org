@@ -6,14 +6,14 @@
 #+STARTUP: showall indent
 #+PROPERTY: header-args :results silent :tangle "./init.el"
 
-* Introduction
-
-**WORK-ALWAYS-IN-PROGRESS**
+*WORK-ALWAYS-IN-PROGRESS*
 
 A literate README that produces an ~init.el~, personalized to my tastes. Relies on ~use-package~, and is based on the following resources:
 
   - [[http://pages.sachachua.com/.emacs.d/Sacha.html#babel-init][Sacha Chua]] - a literate Emacs config
   - [[https://github.com/jamiecollinson/dotfiles/blob/master/config.org/][Jamie Collinson]] - another literate Emacs config based on Sacha's
+
+* Introduction
 
 [[https://en.wikipedia.org/wiki/Literate_programming][According to Wikipedia]], "The literate programming paradigm, as conceived by Knuth, represents a move away from writing computer programs in the manner and order imposed by the computer, and instead enables programmers to develop programs in the order demanded by the logic and flow of their thoughts."
 
@@ -21,7 +21,7 @@ Code in a literate program may be separated, or "tangled" from the source file, 
 
 All of the *tangled* code in this ~README.org~ is Emacs Lisp, though there are some snippets of Bash. That is because we want to tangle to one Emacs Lisp file, ~init.el~.
 
-To stop Emacs from tangling a block of code, make sure the code block header looks like ~#+BEGIN_SRC :tangle no~
+To stop Emacs from tangling a block of code, make sure the code block header looks like ~#+BEGIN_SRC emacs-lisp :tangle no~
 
 For example, this block will be tangled first, at the top of your new ~init.el~:
 
@@ -84,13 +84,13 @@ To install, just (fork and) clone this repository somewhere locally where it can
 
 ** Usage
 
-You will use this file and Emacs' ~org-babel~ feature to generate an ~init.el~ file in the same directory as this file, and then create a symbolic link from ~./init.el~ to ~~/emacs.d/init.el~ .
+You will use this file and Emacs' ~org-babel~ feature to generate an ~init.el~ file in the same directory as this file, and then create a symbolic link from ~./init.el~ to ~\~/emacs.d/init.el~ .
 
 Carefully follow the instructions below to generate your first ~init.el~ in the same directory as this file.
 
 *** Backup
 
-Before using this literate program, first backup your current ~~/emacs.d/init.el~. Just in case.
+Before using this literate program, first backup your current ~\~/emacs.d/init.el~. Just in case.
 
 *** Personal
 
@@ -119,7 +119,7 @@ If you choose option #3, it will also ask you if you want to "Reload?" If this i
 
 *** Link
 
-Finally, if you haven't already done so, you can link your new ~./init.el~ file into your ~~/.emacs.d/~ directory:
+Finally, if you haven't already done so, you can link your new ~./init.el~ file into your ~\~/.emacs.d/~ directory:
 
 #+BEGIN_SRC sh :tangle no
   cd ~/.emacs.d
