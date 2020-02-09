@@ -84,13 +84,13 @@ To install, just (fork and) clone this repository somewhere locally where it can
 
 ** Usage
 
-You will use this file and Emacs' ~org-babel~ feature to generate an ~init.el~ file in the same directory as this file, and then create a symbolic link from ~./init.el~ to ~\~/emacs.d/init.el~ .
+You will use this file and Emacs' ~org-babel~ feature to generate an ~init.el~ file in the same directory as this file, and then create a symbolic link from ~./init.el~ to ~$HOME/emacs.d/init.el~ .
 
 Carefully follow the instructions below to generate your first ~init.el~ in the same directory as this file.
 
 *** Backup
 
-Before using this literate program, first backup your current ~\~/emacs.d/init.el~. Just in case.
+Before using this literate program, first backup your current ~$HOME/emacs.d/init.el~. Just in case.
 
 *** Personal
 
@@ -103,6 +103,12 @@ Obviously you'll want to edit the following, unless you are me. This is the firs
   (setq user-full-name "Joseph Edwards VIII"
         user-mail-address "")
 #+END_SRC
+
+*** Edit and Save
+
+Now edit this ~README.org~ file to suit your own needs. Set ~:tangle no~ to any blocks you want to disable, or delete them entirely, as you like. Note that all code in ~init.el~ must be written in Emacs Lisp, so code blocks in other languages may not be tangled.
+
+When you save, it will ask if you want to "Tangle?" and then "Reload"? These are for convenience only. Saying "no" to both means Emacs will do nothing after saving ~README.org~. Say "no" if you are still editing your file, and don't want to tangle your changes.
 
 *** Tangle
 
@@ -119,7 +125,7 @@ If you choose option #3, it will also ask you if you want to "Reload?" If this i
 
 *** Link
 
-Finally, if you haven't already done so, you can link your new ~./init.el~ file into your ~\~/.emacs.d/~ directory:
+Finally, if you haven't already done so, you can link your new ~./init.el~ file into your ~$HOME/.emacs.d/~ directory:
 
 #+BEGIN_SRC sh :tangle no
   cd ~/.emacs.d
@@ -129,13 +135,7 @@ Finally, if you haven't already done so, you can link your new ~./init.el~ file 
 
 *** Reload
 
-If you need to ever need to reload, just do ~M-: (load-file user-init-file)~
-
-*** Edit and Save
-
-Now edit this ~README.org~ file to suit your own needs. Set ~:tangle no~ to any blocks you want to disable, or delete them entirely, as you like. Note that all code in ~init.el~ must be written in Emacs Lisp, so code blocks in other languages may not be tangled.
-
-When you save, it will ask if you want to "Tangle?" and then "Reload"? These are for convenience only. Saying "no" means Emacs will do nothing after saving ~README.org~.
+If you need to ever need to reload, just do ~M-: (load-file user-init-file) RET~
 
 * Initialize
 
