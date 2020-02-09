@@ -1,4 +1,4 @@
-#+TITLE: Joseph8th's Emacs Init
+#+TITLE: LiteratEmacs
 #+AUTHOR: Joseph Edwards VIII
 #+EMAIL: jedwards8th at gmail.com
 #+DATE: 2020-02-09
@@ -30,7 +30,7 @@ To stop Emacs from tangling a block of code, make sure the code block header loo
   ;; URL: https://github.com/joseph8th/literatemacs
 #+END_SRC
 
-* Requirements
+** Requirements
 
 I was able to use the ~init.el~ this file was derived from with Emacs in Windows with very few changes, so it should work on most systems. There are a few requirements. These may be edited out by setting ~:tangle no~.
 
@@ -38,9 +38,9 @@ I was able to use the ~init.el~ this file was derived from with Emacs in Windows
 - ~editorconfig~ needed by any ~prog-mode~: ~apt install editorconfig~
 - ~ipython3~ needed to replace system's Python interpreter: ~apt install ipython3~
 
-* Installation
+** Installation
 
-** Emacs
+*** Emacs
 
 Obviously, you need Emacs. I like to use the latest release, rather than whatever is in my distro's repos. [[https://www.gnu.org/software/emacs/][That means building it from source.]] However, this config should work just fine with anything >~ 24. Yes that includes Windows and MacOS.
 
@@ -68,7 +68,7 @@ WantedBy=default.target
 - To restart the Emacs server, exit all clients, and do ~systemctl --user restart emacs~
 - To connect an Emacs client to the Emacs server, do ~emacsclient~ or ~emacsclient -t~
 
-** LiteratEmacs
+*** LiteratEmacs
 
 To install, just (fork and) clone this repository somewhere locally where it can stay. If you're not forking, then you can't push your changes, but you can still branch locally, or fork manually later.
 
@@ -80,17 +80,17 @@ To install, just (fork and) clone this repository somewhere locally where it can
   git clone git@github.com:YOURUSERNAME/literatemacs.git .
 #+END_SRC
 
-* Usage
+** Usage
 
 You will use this file and Emacs' ~org-babel~ feature to generate an ~init.el~ file in the same directory as this file, and then create a symbolic link from ~./init.el~ to ~~/emacs.d/init.el~ .
 
 Carefully follow the instructions below to generate your first ~init.el~ in the same directory as this file.
 
-** Backup
+*** Backup
 
 Before using this literate program, first backup your current ~~/emacs.d/init.el~. Just in case.
 
-** Personal
+*** Personal
 
 Obviously you'll want to edit the following, unless you are me. This is the first thing that will be tangled.
 
@@ -102,23 +102,20 @@ Obviously you'll want to edit the following, unless you are me. This is the firs
         user-mail-address "")
 #+END_SRC
 
-** Tangle
+*** Tangle
 
 There are three ways to tangle this file:
 
 1. Use ~M-x org-babel-tangle~ (~C-c C-v t~).
-
-2. *Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~.
-
+2. *Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~:
 #+BEGIN_SRC emacs-lisp :tangle no
   (org-babel-tangle)
 #+END_SRC
-
 3. *Or*, even better, just save and let the ~after-save-hook~, defined in the [[#conclusion][Conclusion]], do its thing.
 
 If you choose option #3, it will also ask you if you want to "Reload?" If this is your first run, that will still be your existing ~init.el~ file, not the new one being created for you. In that case, you may safely say "no" and continue to the next "Link" step
 
-** Link
+*** Link
 
 Finally, if you haven't already done so, you can link your new ~./init.el~ file into your ~~/.emacs.d/~ directory:
 
@@ -128,11 +125,11 @@ Finally, if you haven't already done so, you can link your new ~./init.el~ file 
   ln -s ~/PATH/TO/literatemacs/init.el .
 #+END_SRC
 
-** Reload
+*** Reload
 
 If you need to ever need to reload, just do ~M-: (load-file user-init-file)~
 
-** Edit and Save
+*** Edit and Save
 
 Now edit this ~README.org~ file to suit your own needs. Set ~:tangle no~ to any blocks you want to disable, or delete them entirely, as you like. Note that all code in ~init.el~ must be written in Emacs Lisp, so code blocks in other languages may not be tangled.
 
