@@ -1,22 +1,38 @@
 #+TITLE: Joseph8th's Emacs Init
 #+AUTHOR: Joseph Edwards VIII
 #+EMAIL: jedwards8th at gmail.com
-#+DATE: 2019-02-08
+#+DATE: 2020-02-09
+#+CREATED: 2019-02-08
 #+STARTUP: showall indent
 #+PROPERTY: header-args :results silent :tangle "./init.el"
 
 * Introduction
 
-A literate README that produces my ~init.el~ for Emacs. This is a Work-In-Progress!
+**WORK-ALWAYS-IN-PROGRESS**
 
-The ~init.el~ was originally based on "Dave's .emacs" (my CS prof at the University of New Mexico). Then I hacked away at it for many years myself, ended up with a working mess that required me moving the entire ~.emacs.d~ around. Then I reworked it as this literate Org file, relying on ~use-package~, and based on the following resources:
+A literate README that produces an ~init.el~, personalized to my tastes. Relies on ~use-package~, and is based on the following resources:
 
   - [[http://pages.sachachua.com/.emacs.d/Sacha.html#babel-init][Sacha Chua]] - a literate Emacs config
   - [[https://github.com/jamiecollinson/dotfiles/blob/master/config.org/][Jamie Collinson]] - another literate Emacs config based on Sacha's
 
+[[https://en.wikipedia.org/wiki/Literate_programming][According to Wikipedia]], "The literate programming paradigm, as conceived by Knuth, represents a move away from writing computer programs in the manner and order imposed by the computer, and instead enables programmers to develop programs in the order demanded by the logic and flow of their thoughts."
+
+Code in a literate program may be separated, or "tangled" from the source file, while the non-code parts are "woven" into documentation. Literate programs may tangle code blocks written in different languages, and pipe the outputs of one language's code into the inputs of another language.
+
+All of the *tangled* code in this ~README.org~ is Emacs Lisp, though there are some snippets of Bash. That is because we want to tangle to one Emacs Lisp file, ~init.el~.
+
+To stop Emacs from tangling a block of code, make sure the code block header looks like ~#+BEGIN_SRC :tangle no~
+
+#+BEGIN_SRC
+  ;;; init.el --- Emacs initialization file tangled from a README.org file
+
+  ;; Author: Joseph Edwards VIII <jedwards8th at gmail.com>
+  ;; URL: https://github.com/joseph8th/literatemacs
+#+END_SRC
+
 * Requirements
 
-I use the latest version of Emacs (26.1 now) so I can't predict how well this will work with earlier versions. I also use Linux Mint, so these requirements reflect packages available in Debian-based repositories. That said, I was able to use the ~init.el~ this file was derived from with Emacs in Windows with very few changes, so it should work on most systems.
+I was able to use the ~init.el~ this file was derived from with Emacs in Windows with very few changes, so it should work on most systems. There are a few requirements. These may be edited out by setting ~:tangle no~.
 
 - ~ag~ needed by ~dumb-jump~ and ~ag~: ~apt install silversearcher-ag~
 - ~editorconfig~ needed by any ~prog-mode~: ~apt install editorconfig~
@@ -24,9 +40,13 @@ I use the latest version of Emacs (26.1 now) so I can't predict how well this wi
 
 * Installation
 
-I like to use the latest release of Emacs, rather than whatever is in my distro's repos. [[https://www.gnu.org/software/emacs/][That means building it from source.]] However, this config should work just fine with anything >~ 24.
+** Emacs
 
-I *strongly* recommend running Emacs as a ~systemd~ service if you can. Then Emacs is already running as a server, and you're just connecting to it. Gives Emacs blazingly *FAST* startup. Here's my =~/.config/systemd/user/emacs.service= file:
+Obviously, you need Emacs. I like to use the latest release, rather than whatever is in my distro's repos. [[https://www.gnu.org/software/emacs/][That means building it from source.]] However, this config should work just fine with anything >~ 24. Yes that includes Windows and MacOS.
+
+If you are running Linux, I strongly recommend running Emacs as a ~systemd~ service if you can. Then Emacs is already running as a server, and you're just connecting to it. Gives Emacs blazingly *FAST* startup.
+
+Here's my =~/.config/systemd/user/emacs.service= file:
 
 #+BEGIN_EXAMPLE
 [Unit]
@@ -44,19 +64,79 @@ Restart=on-failure
 WantedBy=default.target
 #+END_EXAMPLE
 
-Now you'll want to do ~systemctl --user enable emacs && systemctl --user start emacs~.
+- Now you'll want to do ~systemctl --user enable emacs && systemctl --user start emacs~
+- To restart the Emacs server, exit all clients, and do ~systemctl --user restart emacs~
+- To connect an Emacs client to the Emacs server, do ~emacsclient~ or ~emacsclient -t~
+
+** LiteratEmacs
+
+To install, just (fork and) clone this repository somewhere locally where it can stay. If you're not forking, then you can't push your changes, but you can still branch locally, or fork manually later.
+
+#+BEGIN_SRC sh :tangle no
+  # If cloning directly from me
+  git clone https://github.com/joseph8th/literatemacs.git .
+
+  # If forking, then cloning from yourself
+  git clone git@github.com:YOURUSERNAME/literatemacs.git .
+#+END_SRC
 
 * Usage
 
-Tangle this file using ~M-x org-babel-tangle~ (~C-c C-v t~), then copy or symlink to =~/.emacs.d/init.el=.
+You will use this file and Emacs' ~org-babel~ feature to generate an ~init.el~ file in the same directory as this file, and then create a symbolic link from ~./init.el~ to ~~/emacs.d/init.el~ .
 
-*Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~.
+Carefully follow the instructions below to generate your first ~init.el~ in the same directory as this file.
+
+** Backup
+
+Before using this literate program, first backup your current ~~/emacs.d/init.el~. Just in case.
+
+** Personal
+
+Obviously you'll want to edit the following, unless you are me. This is the first thing that will be tangled.
+
+#+BEGIN_SRC emacs-lisp
+  ;;; User setting
+  ;;  ----------------------------------------------------------------------------
+
+  (setq user-full-name "Joseph Edwards VIII"
+        user-mail-address "")
+#+END_SRC
+
+** Tangle
+
+There are three ways to tangle this file:
+
+1. Use ~M-x org-babel-tangle~ (~C-c C-v t~).
+
+2. *Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~.
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (org-babel-tangle)
 #+END_SRC
 
-*Or*, even better, just save and let the ~after-save-hook~, defined in the [[#conclusion][Conclusion]], do its thing.
+3. *Or*, even better, just save and let the ~after-save-hook~, defined in the [[#conclusion][Conclusion]], do its thing.
+
+If you choose option #3, it will also ask you if you want to "Reload?" If this is your first run, that will still be your existing ~init.el~ file, not the new one being created for you. In that case, you may safely say "no" and continue to the next "Link" step
+
+** Link
+
+Finally, if you haven't already done so, you can link your new ~./init.el~ file into your ~~/.emacs.d/~ directory:
+
+#+BEGIN_SRC sh :tangle no
+  cd ~/.emacs.d
+  rm init.el
+  ln -s ~/PATH/TO/literatemacs/init.el .
+#+END_SRC
+
+** Reload
+
+If you need to ever need to reload, just do ~M-: (load-file user-init-file)~
+
+** Edit and Save
+
+Now edit this ~README.org~ file to suit your own needs. Set ~:tangle no~ to any blocks you want to disable, or delete them entirely, as you like. Note that all code in ~init.el~ must be written in Emacs Lisp, so code blocks in other languages may not be tangled.
+
+When you save, it will ask if you want to "Tangle?" and then "Reload"? These are for convenience only. Saying "no" means Emacs will do nothing after saving ~README.org~.
 
 * Initialize
 
@@ -82,6 +162,7 @@ Stuff to do during startup.
 Elpa (GNU) is the default, but I add it anyway. Disabling ~package-enable-at-startup~ is SOP to make startup a little quicker.
 
 #+BEGIN_SRC emacs-lisp
+  ;; Set package archives
   (setq package-check-signature nil)  ; because GNU ELPA keeps choking on the sigs
   (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
@@ -110,6 +191,7 @@ Fire up ~use-package~, configured so that it will install and compile any missin
 This is a nice little tidbit copied directly from Jamie Collinson's config. Bumps startup speed.
 
 #+BEGIN_SRC emacs-lisp
+  ;; Increase garbage collection during startup
   (setq gc-cons-threshold 10000000)
 
   ;; Restore after startup
@@ -145,18 +227,6 @@ In case I want to only load configs for this machine, not keeping it in this fil
 * Preferences
 
 All the miscellaneous tweaks that customize Emacs just the way I like it. Much of this was taken from "Dave's .emacs" but the rest was just ad hoc.
-
-** Personal
-
-Obviously you'll want to edit the following, unless you are me:
-
-#+BEGIN_SRC emacs-lisp
-  ;;; Preferences
-  ;;  ----------------------------------------------------------------------------
-
-  (setq user-full-name "Joseph Edwards VIII"
-        user-mail-address "jedwards8th@gmail.com")
-#+END_SRC
 
 ** Short "yes" and "no"
 
@@ -668,9 +738,11 @@ Because it's the best way to deal with ~docker~ and ~docker-compose~.
 
 Because why not?
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Emacs interface to vagrant
-  (use-package vagrant-tramp)
+  (use-package
+    :defer t
+    vagrant-tramp)
 #+END_SRC
 
 ** Navigation and projects
@@ -1354,5 +1426,6 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
 Tangles on save.
 
 ;; Local Variables:
+;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t)
 ;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t)
 ;; End:
