@@ -612,7 +612,11 @@ There's about 90 billion different ways to do these things. I'm still figuring o
 
 #+BEGIN_SRC emacs-lisp
   ;; Company support - text completion
-  (use-package company)
+  (use-package company
+    :defer t
+    :config
+    (setq company-idle-delay 0))
+
 
   ;; Flycheck (add to mode hooks per language)
   (use-package flycheck
@@ -1260,6 +1264,7 @@ Oh yeah, and have to completely override ~org-html-fontify-code~ for export to w
      '((shell . t)
        (python . t)
        (ditaa . t)
+       (sql . t)
        )))
 
   ;; Want to ignore headlines but not section contents if :ignore: added
