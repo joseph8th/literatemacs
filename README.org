@@ -8,10 +8,7 @@
 
 *This file IS the program.*
 
-A literate README that produces an ~init.el~, personalized to my tastes. Relies on ~use-package~, and is based on the following resources:
-
-  - [[http://pages.sachachua.com/.emacs.d/Sacha.html#babel-init][Sacha Chua]] - a literate Emacs config
-  - [[https://github.com/jamiecollinson/dotfiles/blob/master/config.org/][Jamie Collinson]] - another literate Emacs config based on Sacha's
+A literate README that produces an ~init.el~, personalized to my tastes. Uses ~package.el~ and ~use-package~.
 
 * Introduction
 
@@ -23,9 +20,9 @@ To stop Emacs from tangling a block of code, add ~:tangle no~ like this: ~#+BEGI
 
 I was able to use the ~init.el~ this file was derived from with Emacs in Windows with very few changes, so it should work on most systems. There are a few requirements. These may be edited out by setting ~:tangle no~.
 
-- ~ag~ needed by ~dumb-jump~ and ~ag~: ~apt install silversearcher-ag~
-- ~editorconfig~ needed by any ~prog-mode~: ~apt install editorconfig~
-- ~ipython3~ needed to replace system's Python interpreter: ~apt install ipython3~
+- ~ag~ needed by ~dumb-jump~ and ~ag~
+- ~editorconfig~ needed by any ~prog-mode~
+- ~ipython3~ needed to replace system's Python interpreter
 
 ** Installation
 
