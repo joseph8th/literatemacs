@@ -398,7 +398,7 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
 
 ** Dave's .emacs customizations
 
-Because I've been using these for so long I don't even know what they are anymore.
+Because I've been using these for so long I don't even know what they are anymore. *Untangled by default.*
 
 #+BEGIN_SRC emacs-lisp :tangle no
   ;;; Dave's .emacs
