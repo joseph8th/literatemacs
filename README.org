@@ -1,9 +1,9 @@
 #+TITLE: LiteratEmacs
 #+AUTHOR: Joseph Edwards VIII
 #+EMAIL: jedwards8th at gmail.com
-#+DATE: 2020-02-09
+#+DATE: <2020-05-23 Sat>
 #+CREATED: 2019-02-08
-#+STARTUP: showall indent
+#+STARTUP: showall hidestars indent
 #+PROPERTY: header-args :results silent :tangle "./init.el"
 
 *This file IS the program.*
@@ -15,22 +15,9 @@ A literate README that produces an ~init.el~, personalized to my tastes. Relies 
 
 * Introduction
 
-[[https://en.wikipedia.org/wiki/Literate_programming][According to Wikipedia]], "The literate programming paradigm, as conceived by Knuth, represents a move away from writing computer programs in the manner and order imposed by the computer, and instead enables programmers to develop programs in the order demanded by the logic and flow of their thoughts."
-
-Code in a literate program may be separated, or "tangled" from the source file, while the non-code parts are "woven" into documentation. Literate programs may tangle code blocks written in different languages, and pipe the outputs of one language's code into the inputs of another language.
-
 All of the *tangled* code in this ~README.org~ is Emacs Lisp, though there are some snippets of Bash. That is because we want to tangle to one Emacs Lisp file, ~init.el~.
 
-To stop Emacs from tangling a block of code, make sure the code block header looks like ~#+BEGIN_SRC emacs-lisp :tangle no~
-
-For example, this block will be tangled first, at the top of your new ~init.el~:
-
-#+BEGIN_SRC
-  ;;; init.el --- Emacs initialization file tangled from a README.org file
-
-  ;; Author: Joseph Edwards VIII <jedwards8th at gmail.com>
-  ;; URL: https://github.com/joseph8th/literatemacs
-#+END_SRC
+To stop Emacs from tangling a block of code, add ~:tangle no~ like this: ~#+BEGIN_SRC emacs-lisp :tangle no~
 
 ** Requirements
 
@@ -42,13 +29,9 @@ I was able to use the ~init.el~ this file was derived from with Emacs in Windows
 
 ** Installation
 
-*** Emacs
+*** Emacs Service
 
-Obviously, you need Emacs. I like to use the latest release, rather than whatever is in my distro's repos. [[https://www.gnu.org/software/emacs/][That means building it from source.]] However, this config should work just fine with anything >~ 24. Yes that includes Windows and MacOS.
-
-If you are running Linux, I strongly recommend running Emacs as a ~systemd~ service if you can. Then Emacs is already running as a server, and you're just connecting to it. Gives Emacs blazingly *FAST* startup.
-
-Here's my =~/.config/systemd/user/emacs.service= file:
+Here's my =~/.config/systemd/user/emacs.service= file. The path may change per Emacs installation.
 
 #+BEGIN_EXAMPLE
 [Unit]
@@ -97,6 +80,12 @@ Before using this literate program, first backup your current ~$HOME/emacs.d/ini
 Obviously you'll want to edit the following, unless you are me. This is the first thing that will be tangled.
 
 #+BEGIN_SRC emacs-lisp
+  ;;; init.el --- Emacs initialization file tangled from a README.org file
+  ;;
+  ;;  Author: Joseph Edwards VIII <jedwards8th at gmail.com>
+  ;;  URL: https://github.com/joseph8th/literatemacs
+  ;;  ============================================================================
+
   ;;; User setting
   ;;  ----------------------------------------------------------------------------
 
@@ -106,7 +95,7 @@ Obviously you'll want to edit the following, unless you are me. This is the firs
 
 *** Edit and Save
 
-Now edit this ~README.org~ file to suit your own needs. Set ~:tangle no~ to any blocks you want to disable, or delete them entirely, as you like. Note that all code in ~init.el~ must be written in Emacs Lisp, so code blocks in other languages may not be tangled.
+Now edit this ~README.org~ file to suit your own needs. Set ~:tangle no~ to any blocks you want to disable, or delete them entirely, as you like.
 
 When you save, it will ask if you want to "Tangle?" and then "Reload"? These are for convenience only. Saying "no" to both means Emacs will do nothing after saving ~README.org~. Say "no" if you are still editing your file, and don't want to tangle your changes.
 
@@ -393,12 +382,9 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
   (use-package switch-window)
   (global-set-key (kbd "C-x o") 'switch-window)
 
-  ;; Scroll-bar? What's that?
-  (when (display-graphic-p)
-    (set-scroll-bar-mode nil))
-
   ;; [DHA] I *never* use the stupid thing..
-  ;; (menu-bar-mode -1)
+  (global-set-key (kbd "<C-menu>") 'menu-bar-mode)
+  (menu-bar-mode -1)
 
   ;; split window vertically
   ;; (split-window-right)
@@ -417,7 +403,7 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
 
 Because I've been using these for so long I don't even know what they are anymore.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   ;;; Dave's .emacs
   ;;  UNM version, hacked down for student distribution
   ;;  ----------------------------------------------------------------------------
@@ -468,20 +454,35 @@ Because I've been using these for so long I don't even know what they are anymor
 
 SanityInc used to be my go-to, but I'm trying out Material for a while.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   ;;; Appearance
   ;;  ----------------------------------------------------------------------------
 
-  ;; See: https://www.greghendershott.com/2017/02/emacs-themes.html
+  (use-package all-the-icons)
 
+  ;defface org-block-begin-line
+  ; '((t (:underline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF")))
+  ; "Face used for the line delimiting the begin of source blocks.")
+
+  (defface org-block-background
+    '((t (:background "#121212")))
+    "Face used for the source block background.")
+
+  ;defface org-block-end-line
+  ; '((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF")))
+  ; "Face used for the line delimiting the end of source blocks.")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Extra dark BG with bright chars
   (use-package color-theme-sanityinc-tomorrow
     :defer t)
   ;; (load-theme 'sanityinc-tomorrow-bright)
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Material design has lots of nice features (TODO: customize)
   (use-package material-theme
-    :defer t
     :custom-face
     ;; I want the background darker (TODO: tweak to perfection)
     (default ((t (:inherit nil :stipple nil :background "#202023" :foreground "#ffffff" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "PfEd" :family "DejaVu Sans Mono"))))
@@ -496,11 +497,50 @@ SanityInc used to be my go-to, but I'm trying out Material for a while.
     ;; Material's level 1 & 2 headings are too big
     (org-level-1 ((t (:inherit outline-1 :background "#455A64" :box (:line-width 1 :style released-button) :weight bold :height 1.1))))
     (org-level-2 ((t (:inherit outline-2 :background "#35575b" :box (:line-width 1 :style released-button) :height 1.1))))
-)
+    )
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-themes
+    :custom-face
+    ;; I want the background darker (TODO: tweak to perfection)
+    (default ((t (:inherit nil :stipple nil :background "#202023" :foreground "#ffffff" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "PfEd" :family "DejaVu Sans Mono"))))
+
+    (org-block-background ((t (background: "#121215"))))
+
+    ;; Give Level 1 & 2 org headings some oomph
+    (org-level-1 ((t (:inherit outline-1 :background "#455A64" :box (:line-width 1 :style released-button) :weight bold :height 1.1))))
+    (org-level-2 ((t (:inherit outline-2 :background "#35575b" :box (:line-width 1 :style released-button) :height 1.1))))
+
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+    ;; Actual load here
+    (load-theme 'doom-vibrant t)
+
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+
+    ;; Enable custom neotree theme (all-the-icons must be installed!)
+    ;(doom-themes-neotree-config)
+    ;; or for treemacs users
+    ;(setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+    ;(doom-themes-treemacs-config)
+
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; The actual theme to load
-  (load-theme 'material)
+  (load-theme 'doom-dark+ t)
+#+END_SRC
 
+Improve the mode-line
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Improved mode-line (TODO: customize)
   (use-package telephone-line
     :init
@@ -512,7 +552,16 @@ SanityInc used to be my go-to, but I'm trying out Material for a while.
           telephone-line-evil-use-short-tag t)
     :config
     (telephone-line-mode 1))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  ;; Doom-modeline might be fun, the themes are sweet
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Improve titlebar (Jamie)
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   (add-to-list 'default-frame-alist '(ns-appearance . dark))
@@ -1257,6 +1306,7 @@ Oh yeah, and have to completely override ~org-html-fontify-code~ for export to w
     :hook ((org-mode . visual-line-mode)
            (org-mode . org-indent-mode))
     :config
+    ;(setq org-src-fontify-natively t)
     (setq org-todo-keywords
           '((sequence "TODO" "DEV" "READY" "QA" "FAILED" "|" "DONE" "CLOSED")))
     (org-babel-do-load-languages
