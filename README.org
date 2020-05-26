@@ -373,7 +373,7 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
   (tool-bar-mode -1)
 
   ;; disable scroll-bar-mode
-  (scroll-bar-mode 0)
+  (scroll-bar-mode -1)
 
   ;; switch-window
   (use-package switch-window)
@@ -1470,6 +1470,35 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
 
   ;; (setq org-latex-with-hyperref nil)
   ;; (setq org-latex-pdf-process '("pdflatex  %f"))
+#+END_SRC
+
+* Emacs X Window Manager (EXWM)
+
+#+BEGIN_SRC emacs-lisp
+  ;; (menu-bar-mode -1)
+  ;; (tool-bar-mode -1)
+  ;; (scroll-bar-mode -1)
+  (fringe-mode 1)
+
+  ;; (ido-mode 1)
+
+  (server-start)
+
+  (require 'exwm)
+  (require 'exwm-config)
+  (exwm-config-ido)
+
+  (setq exwm-workspace-number 4)
+
+  ;;; In case we're embedded in LXDE
+  ;;  (defun exwm-logout ()
+  ;;    (interactive)
+  ;;    (recentf-save-list)
+  ;;    (save-some-buffers)
+  ;;    (start-process-shell-command "logout" nil "lxsession-logout"))
+
+  ;;; Doesn't matter if we wanna use it. It's cool. Do it.
+  (exwm-enable)
 #+END_SRC
 
 * Conclusion
