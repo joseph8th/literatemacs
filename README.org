@@ -1474,7 +1474,7 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
 
 * Emacs X Window Manager (EXWM)
 
-**Makes the old joke about Emacs being a great OS...**
+*Makes the old joke about Emacs being a great OS...*
 
 [[file:exwm-ex.png]]
 
@@ -1500,7 +1500,7 @@ Optional packages:
 
 ** EXWM Config
 
-**To Tangle**: delete ~:tangle no~ from the block header.
+*To Tangle*: delete ~:tangle no~ from the block header.
 
 #+BEGIN_SRC emacs-lisp
   ;;; Load the EXWM config from a separate file if it exists
@@ -1509,7 +1509,7 @@ Optional packages:
       (load "~/.emacs.d/exwm-init.el"))
 #+END_SRC
 
-**To Tangle**: change ~:tangle no~ to ~:tangle exwm-init.el~.
+*To Tangle*: change ~:tangle no~ to ~:tangle exwm-init.el~.
 
 #+BEGIN_SRC emacs-lisp :tangle exwm-init.el
   ;;; ----------------------------------------------------------------------------
@@ -1635,9 +1635,9 @@ Optional packages:
 
 As described in the EXWM documentation, make sure ~xorg-xinit~ is installed on the system.
 
-Using GDM, ~.xinitrc~ will not interfere with the existing Gnome DE. **BUT**, if the ~.xinitrc~ or ~.xsessions~ files already exist, this will **BREAK SHIT**. It's still doable but not in the scope of this README.
+Using GDM, ~.xinitrc~ will not interfere with the existing Gnome DE. *BUT*, if the ~.xinitrc~ or ~.xsessions~ files already exist, this will *BREAK SHIT*. It's still doable but not in the scope of this README.
 
-**To Tangle**: change ~:tangle no~ to ~:tangle xinitrc.exwm~. Otherwise, just use as reference.
+*To Tangle*: change ~:tangle no~ to ~:tangle xinitrc.exwm~. Otherwise, just use as reference.
 
 #+BEGIN_SRC bash :tangle xinitrc.exwm
   # You may need to comment out the next line to disable access control.
@@ -1680,7 +1680,7 @@ EXWM may be an option from the existing DM login screen. First do: ~ln -s ~/.xin
 
 Then create the file ~/usr/share/xsessions/exwm.desktop~, like the following.
 
-**NOTE**: you need to *hardcode* your ~<PATHTO>~ since this is a config file not a bash script.
+*NOTE*: you need to *hardcode* your ~<PATHTO>~ since this is a config file not a bash script.
 
 #+BEGIN_EXAMPLE
   [Desktop Entry]
