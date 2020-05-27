@@ -103,7 +103,7 @@ There are three ways to tangle this file:
 1. Use ~M-x org-babel-tangle~ (~C-c C-v t~).
 2. *Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~:
     #+BEGIN_SRC emacs-lisp :tangle no
-      (org-babel-tangle)
+    (org-babel-tangle)
     #+END_SRC
 3. *Or*, even better, just save and let the ~after-save-hook~, defined in the [[#conclusion][Conclusion]], do its thing.
 
@@ -1474,15 +1474,53 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
 
 * Emacs X Window Manager (EXWM)
 
+**Makes the old joke about Emacs being a great OS...**
+
+[[file:exwm-ex.png]]
+
+[[https://github.com/ch11ng/exwm][EXWM]] is special, and I don't always want it, or some of the customizations it necessitates, but when I do, I want it to be easy and not interfere with my existing desktop environment (if any).
+
+The easiest thing was to tangle it to a separate file, ~exwm-init.el~, which I then symlink into my ~.emacs.d/~ when I want it enabled.
+
+This literate README works for me as both a stand-alone WM on a bare-bones Arch Linux VM with no DE, and on my laptop as an alternative window manager to the default (Pop!_OS/Gnome). I can do the ole switcheroo at login.
+
+** Install EXWM
+
+EXWM has its own system dependencies (like ~xorg-xinit~) so refer to the [[https://github.com/ch11ng/exwm/wiki][EXWM User Guide]] before tangling this section.
+
+For now, I just used ~package-list-packages~ to install everything default. I'll revisit with ~use-package~ later.
+
+- ~exwm~ - Will install requirements as well
+
+Optional packages:
+
+- ~exwm-edit~ - Edit any editable element in a buffer
+- ~exwm-mff~ - Mouse follows focus
+- ~helm-exwm~ - Because sometimes helm's the way to go, and it needs to work
+
+** EXWM Config
+
+**To Tangle**: delete ~:tangle no~ from the block header.
+
 #+BEGIN_SRC emacs-lisp
+  ;;; Load the EXWM config from a separate file if it exists
+
+  (if (file-exists-p "~/.emacs.d/exwm-init.el")
+      (load "~/.emacs.d/exwm-init.el"))
+#+END_SRC
+
+**To Tangle**: change ~:tangle no~ to ~:tangle exwm-init.el~.
+
+#+BEGIN_SRC emacs-lisp :tangle exwm-init.el
+  ;;; ----------------------------------------------------------------------------
+  ;;  exwm - emacs X window manager
+
   ;; (menu-bar-mode -1)
   ;; (tool-bar-mode -1)
   ;; (scroll-bar-mode -1)
   (fringe-mode 1)
-
   ;; (ido-mode 1)
-
-  (server-start)
+  ;; (server-start)
 
   (require 'exwm)
   (require 'exwm-config)
@@ -1529,7 +1567,7 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
                     (number-sequence 0 9))
           ;; Bind "s-&" to launch applications ('M-&' also works if the output
           ;; buffer does not bother you).
-          ([?\s-&] . (lambda (command)
+          ([?\s-menu] . (lambda (command)
                        (interactive (list (read-shell-command "$ ")))
                        (start-process-shell-command command nil command)))
           ;; Bind "s-<f2>" to "slock", a simple X display locker.
@@ -1572,6 +1610,15 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
   ;; uncommenting the following line.
   (setq exwm-workspace-minibuffer-position 'bottom)
 
+  ;; Multiple-screen support
+  ;; (require 'exwm-randr)
+  ;; (setq exwm-randr-workspace-output-plist '(0 "VGA1"))
+  ;; (add-hook 'exwm-randr-screen-change-hook
+  ;;           (lambda ()
+  ;;             (start-process-shell-command
+  ;;              "xrandr" nil "xrandr --output VGA1 --left-of LVDS1 --auto")))
+  ;; (exwm-randr-enable)
+
   ;;; In case we're embedded in LXDE
   ;;  (defun exwm-logout ()
   ;;    (interactive)
@@ -1583,6 +1630,67 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
   ;; ready.  You can put it _anywhere_ in your configuration.
   (exwm-enable)
 #+END_SRC
+
+** XOrg XInit
+
+As described in the EXWM documentation, make sure ~xorg-xinit~ is installed on the system.
+
+Using GDM, ~.xinitrc~ will not interfere with the existing Gnome DE. **BUT**, if the ~.xinitrc~ or ~.xsessions~ files already exist, this will **BREAK SHIT**. It's still doable but not in the scope of this README.
+
+**To Tangle**: change ~:tangle no~ to ~:tangle xinitrc.exwm~. Otherwise, just use as reference.
+
+#+BEGIN_SRC bash :tangle xinitrc.exwm
+  # You may need to comment out the next line to disable access control.
+  #xhost +SI:localuser:$USER
+
+  # Set themes, etc.
+  gnome-settings-daemon &
+
+  # Set fallback cursor.
+  xsetroot -cursor_name left_ptr
+
+  # Set keyboard repeat rate.
+  xset r rate 200 60
+
+  # If Emacs is started in server mode, `emacsclient` is a convenient way to
+  # edit files in place (used by e.g. `git commit`).
+  export VISUAL=emacsclient
+  export EDITOR="$VISUAL"
+
+  # Finally launch emacs.
+  #exec dbus-launch --exit-with-session emacs
+  #compton &
+  # guake &
+  exec emacs
+#+END_SRC
+
+To use the tangled ~xinitrc.exwm~, copy or symlink it to ~$HOME/.xinitrc~.
+
+** Testing
+
+Switch to a new TTY console. Usually ~tty1~ is the Desktop Manager itself, and ~tty2~ is you as you read this. To change TTY, just do ~C-M-F#~ where "#" is the Function Key number. Ie, ~C-M-F3~ will get ~tty3~.
+
+Then just login to the console, and run ~startx~. Emacs should start, running as an X Window Manager.
+
+If there is no other X Window server running on the system (ie, you logged in to the console directly, not from a graphical DM) then you can start EXWM with ~xinit -- vt0#~ where '#' is the TTY number.
+
+** Desktop Manager
+
+EXWM may be an option from the existing DM login screen. First do: ~ln -s ~/.xinitrc ~/.xsessions~
+
+Then create the file ~/usr/share/xsessions/exwm.desktop~, like the following.
+
+**NOTE**: you need to *hardcode* your ~<PATHTO>~ since this is a config file not a bash script.
+
+#+BEGIN_EXAMPLE
+  [Desktop Entry]
+  Name=EXWM
+  Comment=Emacs X Window Manager
+  Exec=<PATHTO>/.xsessions
+  Type=Application
+#+END_EXAMPLE
+
+Now, you should have an 'EXWM' option in the gear icon on the GDM login screen. If the testing went OK, then this should work, too since it's calling the same init script.
 
 * Conclusion
 
