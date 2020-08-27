@@ -809,7 +809,7 @@ Projectile + Helm + IDO.
   (use-package ido
     :config
     (use-package ido-vertical-mode)
-    (use-package ido-hacks)
+    ;; (use-package ido-hacks)
     (ido-mode t)
     (ido-vertical-mode))
 
