@@ -1,54 +1,34 @@
 #+TITLE: LiteratEmacs
 #+AUTHOR: Joseph Edwards VIII
 #+EMAIL: jedwards8th at gmail.com
-#+DATE: 2020-02-09
+#+DATE: <2020-08-27 Thu>
 #+CREATED: 2019-02-08
-#+STARTUP: showall indent
+#+STARTUP: showall hidestars indent
 #+PROPERTY: header-args :results silent :tangle "./init.el"
 
 *This file IS the program.*
 
-A literate README that produces an ~init.el~, personalized to my tastes. Relies on ~use-package~, and is based on the following resources:
-
-  - [[http://pages.sachachua.com/.emacs.d/Sacha.html#babel-init][Sacha Chua]] - a literate Emacs config
-  - [[https://github.com/jamiecollinson/dotfiles/blob/master/config.org/][Jamie Collinson]] - another literate Emacs config based on Sacha's
+A literate README that produces an ~init.el~, personalized to my tastes. Uses ~package.el~ and ~use-package~.
 
 * Introduction
 
-[[https://en.wikipedia.org/wiki/Literate_programming][According to Wikipedia]], "The literate programming paradigm, as conceived by Knuth, represents a move away from writing computer programs in the manner and order imposed by the computer, and instead enables programmers to develop programs in the order demanded by the logic and flow of their thoughts."
-
-Code in a literate program may be separated, or "tangled" from the source file, while the non-code parts are "woven" into documentation. Literate programs may tangle code blocks written in different languages, and pipe the outputs of one language's code into the inputs of another language.
-
 All of the *tangled* code in this ~README.org~ is Emacs Lisp, though there are some snippets of Bash. That is because we want to tangle to one Emacs Lisp file, ~init.el~.
 
-To stop Emacs from tangling a block of code, make sure the code block header looks like ~#+BEGIN_SRC emacs-lisp :tangle no~
-
-For example, this block will be tangled first, at the top of your new ~init.el~:
-
-#+BEGIN_SRC
-  ;;; init.el --- Emacs initialization file tangled from a README.org file
-
-  ;; Author: Joseph Edwards VIII <jedwards8th at gmail.com>
-  ;; URL: https://github.com/joseph8th/literatemacs
-#+END_SRC
+To stop Emacs from tangling a block of code, add ~:tangle no~ like this: ~#+BEGIN_SRC emacs-lisp :tangle no~
 
 ** Requirements
 
 I was able to use the ~init.el~ this file was derived from with Emacs in Windows with very few changes, so it should work on most systems. There are a few requirements. These may be edited out by setting ~:tangle no~.
 
-- ~ag~ needed by ~dumb-jump~ and ~ag~: ~apt install silversearcher-ag~
-- ~editorconfig~ needed by any ~prog-mode~: ~apt install editorconfig~
-- ~ipython3~ needed to replace system's Python interpreter: ~apt install ipython3~
+- ~ag~ needed by ~dumb-jump~ and ~ag~
+- ~editorconfig~ needed by any ~prog-mode~
+- ~ipython3~ needed to replace system's Python interpreter
 
 ** Installation
 
-*** Emacs
+*** Emacs Service
 
-Obviously, you need Emacs. I like to use the latest release, rather than whatever is in my distro's repos. [[https://www.gnu.org/software/emacs/][That means building it from source.]] However, this config should work just fine with anything >~ 24. Yes that includes Windows and MacOS.
-
-If you are running Linux, I strongly recommend running Emacs as a ~systemd~ service if you can. Then Emacs is already running as a server, and you're just connecting to it. Gives Emacs blazingly *FAST* startup.
-
-Here's my =~/.config/systemd/user/emacs.service= file:
+Here's my =~/.config/systemd/user/emacs.service= file. The path may change per Emacs installation.
 
 #+BEGIN_EXAMPLE
 [Unit]
@@ -97,6 +77,12 @@ Before using this literate program, first backup your current ~$HOME/emacs.d/ini
 Obviously you'll want to edit the following, unless you are me. This is the first thing that will be tangled.
 
 #+BEGIN_SRC emacs-lisp
+  ;;; init.el --- Emacs initialization file tangled from a README.org file
+  ;;
+  ;;  Author: Joseph Edwards VIII <jedwards8th at gmail.com>
+  ;;  URL: https://github.com/joseph8th/literatemacs
+  ;;  ============================================================================
+
   ;;; User setting
   ;;  ----------------------------------------------------------------------------
 
@@ -106,7 +92,7 @@ Obviously you'll want to edit the following, unless you are me. This is the firs
 
 *** Edit and Save
 
-Now edit this ~README.org~ file to suit your own needs. Set ~:tangle no~ to any blocks you want to disable, or delete them entirely, as you like. Note that all code in ~init.el~ must be written in Emacs Lisp, so code blocks in other languages may not be tangled.
+Now edit this ~README.org~ file to suit your own needs. Set ~:tangle no~ to any blocks you want to disable, or delete them entirely, as you like.
 
 When you save, it will ask if you want to "Tangle?" and then "Reload"? These are for convenience only. Saying "no" to both means Emacs will do nothing after saving ~README.org~. Say "no" if you are still editing your file, and don't want to tangle your changes.
 
@@ -117,7 +103,7 @@ There are three ways to tangle this file:
 1. Use ~M-x org-babel-tangle~ (~C-c C-v t~).
 2. *Or*, even better, just put your cursor inside the following code block and do ~C-c C-c~:
     #+BEGIN_SRC emacs-lisp :tangle no
-      (org-babel-tangle)
+    (org-babel-tangle)
     #+END_SRC
 3. *Or*, even better, just save and let the ~after-save-hook~, defined in the [[#conclusion][Conclusion]], do its thing.
 
@@ -387,18 +373,15 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
   (tool-bar-mode -1)
 
   ;; disable scroll-bar-mode
-  (scroll-bar-mode 0)
+  (scroll-bar-mode -1)
 
   ;; switch-window
   (use-package switch-window)
   (global-set-key (kbd "C-x o") 'switch-window)
 
-  ;; Scroll-bar? What's that?
-  (when (display-graphic-p)
-    (set-scroll-bar-mode nil))
-
   ;; [DHA] I *never* use the stupid thing..
-  ;; (menu-bar-mode -1)
+  (global-set-key (kbd "<C-menu>") 'menu-bar-mode)
+  (menu-bar-mode -1)
 
   ;; split window vertically
   ;; (split-window-right)
@@ -415,9 +398,9 @@ Couple items here taken from "Daves .emacs", and some were lifted out of my old 
 
 ** Dave's .emacs customizations
 
-Because I've been using these for so long I don't even know what they are anymore.
+Because I've been using these for so long I don't even know what they are anymore. *Untangled by default.*
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   ;;; Dave's .emacs
   ;;  UNM version, hacked down for student distribution
   ;;  ----------------------------------------------------------------------------
@@ -468,20 +451,35 @@ Because I've been using these for so long I don't even know what they are anymor
 
 SanityInc used to be my go-to, but I'm trying out Material for a while.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   ;;; Appearance
   ;;  ----------------------------------------------------------------------------
 
-  ;; See: https://www.greghendershott.com/2017/02/emacs-themes.html
+  (use-package all-the-icons)
 
+  ;defface org-block-begin-line
+  ; '((t (:underline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF")))
+  ; "Face used for the line delimiting the begin of source blocks.")
+
+  (defface org-block-background
+    '((t (:background "#121212")))
+    "Face used for the source block background.")
+
+  ;defface org-block-end-line
+  ; '((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF")))
+  ; "Face used for the line delimiting the end of source blocks.")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Extra dark BG with bright chars
   (use-package color-theme-sanityinc-tomorrow
-    :defer t)
+    )
   ;; (load-theme 'sanityinc-tomorrow-bright)
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Material design has lots of nice features (TODO: customize)
   (use-package material-theme
-    :defer t
     :custom-face
     ;; I want the background darker (TODO: tweak to perfection)
     (default ((t (:inherit nil :stipple nil :background "#202023" :foreground "#ffffff" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "PfEd" :family "DejaVu Sans Mono"))))
@@ -496,11 +494,50 @@ SanityInc used to be my go-to, but I'm trying out Material for a while.
     ;; Material's level 1 & 2 headings are too big
     (org-level-1 ((t (:inherit outline-1 :background "#455A64" :box (:line-width 1 :style released-button) :weight bold :height 1.1))))
     (org-level-2 ((t (:inherit outline-2 :background "#35575b" :box (:line-width 1 :style released-button) :height 1.1))))
-)
+    )
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-themes
+    :custom-face
+    ;; I want the background darker (TODO: tweak to perfection)
+    (default ((t (:inherit nil :stipple nil :background "#202023" :foreground "#ffffff" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "PfEd" :family "DejaVu Sans Mono"))))
+
+    (org-block-background ((t (background: "#121215"))))
+
+    ;; Give Level 1 & 2 org headings some oomph
+    (org-level-1 ((t (:inherit outline-1 :background "#455A64" :box (:line-width 1 :style released-button) :weight bold :height 1.1))))
+    (org-level-2 ((t (:inherit outline-2 :background "#35575b" :box (:line-width 1 :style released-button) :height 1.1))))
+
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+    ;; Actual load here
+    (load-theme 'doom-dark+ t)
+
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+
+    ;; Enable custom neotree theme (all-the-icons must be installed!)
+    ;(doom-themes-neotree-config)
+    ;; or for treemacs users
+    ;(setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+    ;(doom-themes-treemacs-config)
+
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; The actual theme to load
-  (load-theme 'material)
+  (load-theme 'doom-dark+ t)
+#+END_SRC
 
+Improve the mode-line
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Improved mode-line (TODO: customize)
   (use-package telephone-line
     :init
@@ -512,7 +549,16 @@ SanityInc used to be my go-to, but I'm trying out Material for a while.
           telephone-line-evil-use-short-tag t)
     :config
     (telephone-line-mode 1))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  ;; Doom-modeline might be fun, the themes are sweet
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; Improve titlebar (Jamie)
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   (add-to-list 'default-frame-alist '(ns-appearance . dark))
@@ -613,14 +659,14 @@ There's about 90 billion different ways to do these things. I'm still figuring o
 #+BEGIN_SRC emacs-lisp
   ;; Company support - text completion
   (use-package company
-    :defer t
+
     :config
     (setq company-idle-delay 0))
 
 
   ;; Flycheck (add to mode hooks per language)
   (use-package flycheck
-    :defer t
+
     :config
     (use-package flycheck-inline
       :hook (flycheck-mode . turn-on-flycheck-inline)))
@@ -647,7 +693,7 @@ There's about 90 billion different ways to do these things. I'm still figuring o
 
   ;; Yasnippet
   (use-package yasnippet
-    :defer t
+
     :init
     (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
     :bind (:map yas-minor-mode-map
@@ -666,7 +712,7 @@ Don't use it as often as I should. Old habits and all that.
 #+BEGIN_SRC emacs-lisp
   ;; Magit, of course
   (use-package magit
-    :defer t
+
     :bind (("C-x g" . magit-status))
     :config
     (use-package magit-popup))
@@ -691,11 +737,14 @@ Multiple cursor support. Faster grepping. A REST client (bye-bye Postman).
   (use-package ag)
 
   ;; REST Client in Emacs? But of course!
-  (use-package restclient :defer t)
+  (use-package restclient
+
+    :config
+    (use-package ob-restclient))
 
   ;; SO in Emacs? Uh-huh. (Thx Jamie)
   (use-package sx
-    :defer t
+
     :config
     (bind-keys :prefix "C-c s"
                :prefix-map my-sx-map
@@ -741,10 +790,10 @@ Because it's the best way to deal with ~docker~ and ~docker-compose~.
 
 Because why not?
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   ;; Emacs interface to vagrant
   (use-package
-    :defer t
+
     vagrant-tramp)
 #+END_SRC
 
@@ -940,7 +989,7 @@ I use the iPython3 interpreter, so make sure it's installed.
   ;; Basic python-mode config. I've been using this for years with no problems.
   (use-package python
     :mode ("\\.py\\'" . python-mode)
-    :interpreter ("/usr/bin/ipython3" . python-mode)
+    :interpreter ("/usr/bin/python3" . python-mode)
     :hook (python-mode . fci-mode)
     :config
     (use-package pyvenv))
@@ -968,16 +1017,16 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
   ;;  ----------------------------------------------------------------------------
 
   (use-package web-mode
-    :defer t)
+    )
   (use-package mmm-mode
-    :defer t
+
     :init
     (setq mmm-global-mode 'maybe)
     :config
     (mmm-add-mode-ext-class 'html-mode "\\.php\\'" 'html-php))
 
   (use-package php-mode
-    :defer t
+
     :hook ((php-mode . editorconfig-mode)
            (php-mode . fci-mode)
            (php-mode . (lambda ()
@@ -1000,7 +1049,7 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
   ;;  ----------------------------------------------------------------------------
 
   (use-package markdown-mode
-    :defer t
+
     :commands (markdown-mode gfm-mode)
     :mode (("README\\.md\\'" . gfm-mode)
            ("\\.md\\'" . markdown-mode)
@@ -1008,7 +1057,7 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
     :init (setq markdown-command "multimarkdown"))
 
   (use-package markdown-preview-mode
-    :defer t
+
     :config
     (add-to-list 'markdown-preview-stylesheets "https://raw.githubusercontent.com/richleland/pygments-css/master/emacs.css"))
 #+END_SRC
@@ -1020,11 +1069,11 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
 ;;  ----------------------------------------------------------------------------
 
 (use-package json-mode
-  :defer t)
+  )
 (use-package json-reformat
-  :defer t)
+  )
 (use-package jsonrpc
-  :defer t)
+  )
 #+END_SRC
 
 *** XML
@@ -1066,7 +1115,7 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
   ;;  ----------------------------------------------------------------------------
 
   (use-package yaml-mode
-    :defer t
+
     :init
     (setq indent-tabs-mode nil)
     :mode "\\.yml\\'"
@@ -1089,7 +1138,7 @@ See [[https://millejoh.github.io/emacs-ipython-notebook/][EIN]] for requirements
   ;;  ----------------------------------------------------------------------------
 
   (use-package ein
-    :defer t
+
     :config
     (use-package ein-notebook)
     (use-package ein-subpackages)
@@ -1108,16 +1157,16 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
   ;; Rust lang
   (add-to-list 'exec-path "~/.cargo/bin")
   (use-package rust-mode
-    :defer t
+
     :mode "\\.rs\\'"
     :config (setq rust-format-on-save t)
     :init
     (add-hook 'rust-mode-hook 'fci-mode))
 
   (use-package rustic
-    :defer t)
+    )
   (use-package cargo
-    :defer t
+
     :init
     (add-hook 'rust-mode-hook 'cargo-minor-mode)
     (add-hook 'rust-mode-hook
@@ -1126,7 +1175,7 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
     (add-hook 'toml-mode-hook 'cargo-minor-mode))
 
   (use-package racer
-    :defer t
+
     :init
     (add-hook 'rust-mode-hook #'racer-mode)
     (add-hook 'racer-mode-hook #'eldoc-mode)
@@ -1139,7 +1188,7 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
 
   ;; Flycheck for Rust
   (use-package flycheck-rust
-    :defer t
+
     :init
     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+END_SRC
@@ -1152,8 +1201,7 @@ I don't use Go very often, so it's not tangled by default.
   ;;; Go
   ;;  ----------------------------------------------------------------------------
 
-  (use-package go-mode
-    :defer t)
+  (use-package go-mode)
 #+END_SRC
 
 **** Javascript
@@ -1186,10 +1234,10 @@ I'll get around to tricking out \LaTeX\ one of these days.
 Really, really nice to have for rendering ASCII charts and embedding them in ~org-mode~ exports. Must install ~ditaa.jar~ and update the path for this to work.
 
 #+BEGIN_SRC emacs-lisp :tangle no
-;;; ditaa.jar
-;;  ----------------------------------------------------------------------------
+  ;;; ditaa.jar
+  ;;  ----------------------------------------------------------------------------
 
-(setq org-ditaa-jar-path "/usr/bin/ditaa")
+  (setq org-ditaa-jar-path "/usr/bin/ditaa")
 #+END_SRC
 
 **** GNUPlot
@@ -1257,6 +1305,7 @@ Oh yeah, and have to completely override ~org-html-fontify-code~ for export to w
     :hook ((org-mode . visual-line-mode)
            (org-mode . org-indent-mode))
     :config
+    ;(setq org-src-fontify-natively t)
     (setq org-todo-keywords
           '((sequence "TODO" "DEV" "READY" "QA" "FAILED" "|" "DONE" "CLOSED")))
     (org-babel-do-load-languages
@@ -1265,6 +1314,7 @@ Oh yeah, and have to completely override ~org-html-fontify-code~ for export to w
        (python . t)
        (ditaa . t)
        (sql . t)
+       (restclient . t)
        )))
 
   ;; Want to ignore headlines but not section contents if :ignore: added
@@ -1370,6 +1420,14 @@ For my ~oporg~ project (WIP), so not tangled by default.
     (ws-stop-all))
 #+END_SRC
 
+** Dungeons & Dragons
+
+Because Emacs rocks.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-d20)
+#+END_SRC
+
 ** Writing mode
 
 Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For creative writing.
@@ -1424,6 +1482,229 @@ Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For
   ;; (setq org-latex-with-hyperref nil)
   ;; (setq org-latex-pdf-process '("pdflatex  %f"))
 #+END_SRC
+
+* Emacs X Window Manager (EXWM)
+
+*Makes the old joke about Emacs being a great OS...*
+
+[[file:exwm-ex.png]]
+
+[[https://github.com/ch11ng/exwm][EXWM]] is special, and I don't always want it, or some of the customizations it necessitates, but when I do, I want it to be easy and not interfere with my existing desktop environment (if any).
+
+The easiest thing was to tangle it to a separate file, ~exwm-init.el~, which I then symlink into my ~.emacs.d/~ when I want it enabled.
+
+This literate README works for me as both a stand-alone WM on a bare-bones Arch Linux VM with no DE, and on my laptop as an alternative window manager to the default (Pop!_OS/Gnome). I can do the ole switcheroo at login.
+
+** Install EXWM
+
+EXWM has its own system dependencies (like ~xorg-xinit~) so refer to the [[https://github.com/ch11ng/exwm/wiki][EXWM User Guide]] before tangling this section.
+
+For now, I just used ~package-list-packages~ to install everything default. I'll revisit with ~use-package~ later.
+
+- ~exwm~ - Will install requirements as well
+
+Optional packages:
+
+- ~exwm-edit~ - Edit any editable element in a buffer
+- ~exwm-mff~ - Mouse follows focus
+- ~helm-exwm~ - Because sometimes helm's the way to go, and it needs to work
+
+** EXWM Config
+
+*To Tangle*: delete ~:tangle no~ from the block header.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;;; Load the EXWM config from a separate file if it exists
+
+  (if (file-exists-p "~/.emacs.d/exwm-init.el")
+      (load "~/.emacs.d/exwm-init.el"))
+#+END_SRC
+
+*To Tangle*: change ~:tangle no~ to ~:tangle exwm-init.el~.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+    ;;; ----------------------------------------------------------------------------
+    ;;  exwm - emacs X window manager
+
+    ;; (menu-bar-mode -1)
+    ;; (tool-bar-mode -1)
+    ;; (scroll-bar-mode -1)
+    (fringe-mode 1)
+    ;; (ido-mode 1)
+    ;; (server-start)
+
+    (require 'exwm)
+    (require 'exwm-config)
+    (exwm-config-ido)
+
+    (setq exwm-workspace-number 4)
+
+    ;; All buffers created in EXWM mode are named "*EXWM*". You may want to
+    ;; change it in `exwm-update-class-hook' and `exwm-update-title-hook', which
+    ;; are run when a new X window class name or title is available.  Here's
+    ;; some advice on this topic:
+    ;; + Always use `exwm-workspace-rename-buffer` to avoid naming conflict.
+    ;; + For applications with multiple windows (e.g. GIMP), the class names of
+    ;    all windows are probably the same.  Using window titles for them makes
+    ;;   more sense.
+    ;; In the following example, we use class names for all windows except for
+    ;; Java applications and GIMP.
+    (add-hook 'exwm-update-class-hook
+              (lambda ()
+                (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                            (string= "gimp" exwm-instance-name))
+                  (exwm-workspace-rename-buffer exwm-class-name))))
+    (add-hook 'exwm-update-title-hook
+              (lambda ()
+                (when (or (not exwm-instance-name)
+                          (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                          (string= "gimp" exwm-instance-name))
+                  (exwm-workspace-rename-buffer exwm-title))))
+
+    ;; Global keybindings can be defined with `exwm-input-global-keys'.
+    ;; Here are a few examples:
+    (setq exwm-input-global-keys
+          `(
+            ;; Bind "s-r" to exit char-mode and fullscreen mode.
+            ([?\s-r] . exwm-reset)
+            ;; Bind "s-w" to switch workspace interactively.
+            ([?\s-w] . exwm-workspace-switch)
+            ;; Bind "s-0" to "s-9" to switch to a workspace by its index.
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch-create ,i))))
+                      (number-sequence 0 9))
+            ;; Bind "s-&" to launch applications ('M-&' also works if the output
+            ;; buffer does not bother you). [?\s-&]
+            ([?\s-&] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))
+            ;; Bind "s-<f2>" to "slock", a simple X display locker.
+            ([s-f2] . (lambda ()
+                        (interactive)
+                        (start-process "" nil "/usr/bin/slock")))))
+
+    ;; To add a key binding only available in line-mode, simply define it in
+    ;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.
+    (define-key exwm-mode-map [?\C-q] #'exwm-input-send-next-key)
+
+    ;; The following example demonstrates how to use simulation keys to mimic
+    ;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
+    ;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
+    ;; and DEST is what EXWM actually sends to application.  Note that both SRC
+    ;; and DEST should be key sequences (vector or string).
+    ;;(setq exwm-input-simulation-keys
+    ;;      '(
+    ;;        ;; movement
+    ;;        ([?\C-b] . [left])
+    ;;        ([?\M-b] . [C-left])
+    ;;        ([?\C-f] . [right])
+    ;;        ([?\M-f] . [C-right])
+    ;;        ([?\C-p] . [up])
+    ;;        ([?\C-n] . [down])
+    ;;        ([?\C-a] . [home])
+    ;;        ([?\C-e] . [end])
+    ;;        ([?\M-v] . [prior])
+    ;;        ([?\C-v] . [next])
+    ;;        ([?\C-d] . [delete])
+    ;;        ([?\C-k] . [S-end delete])
+    ;;        ;; cut/paste.
+    ;;        ([?\C-w] . [?\C-x])
+    ;;        ([?\M-w] . [?\C-c])
+    ;;        ([?\C-y] . [?\C-v])
+    ;;        ;; search
+    ;;        ([?\C-s] . [?\C-f])))
+
+    ;; You can hide the minibuffer and echo area when they're not used, by
+    ;; uncommenting the following line.
+    ;(setq exwm-workspace-minibuffer-position 'bottom)
+
+    ;; Multiple-screen support
+    ;; (require 'exwm-randr)
+    ;; (setq exwm-randr-workspace-output-plist '(0 "VGA1"))
+    ;; (add-hook 'exwm-randr-screen-change-hook
+    ;;           (lambda ()
+    ;;             (start-process-shell-command
+    ;;              "xrandr" nil "xrandr --output VGA1 --left-of LVDS1 --auto")))
+    ;; (exwm-randr-enable)
+
+    ;;; In case we're embedded in LXDE
+    ;;  (defun exwm-logout ()
+    ;;    (interactive)
+    ;;    (recentf-save-list)
+    ;;    (save-some-buffers)
+    ;;    (start-process-shell-command "logout" nil "lxsession-logout"))
+
+    ;; Do not forget to enable EXWM. It will start by itself when things are
+    ;; ready.  You can put it _anywhere_ in your configuration.
+    (exwm-enable)
+#+END_SRC
+
+** XOrg XInit
+
+As described in the EXWM documentation, make sure ~xorg-xinit~ is installed on the system.
+
+Using GDM, ~.xinitrc~ will not interfere with the existing Gnome DE. *BUT*, if the ~.xinitrc~ or ~.xsessions~ files already exist, this will *BREAK SHIT*. It's still doable but not in the scope of this README.
+
+*To Tangle*: change ~:tangle no~ to ~:tangle xinitrc.exwm~. Otherwise, just use as reference.
+
+#+BEGIN_SRC bash :tangle no
+  # You may need to comment out the next line to disable access control.
+  #xhost +SI:localuser:$USER
+
+  # Set themes, etc.
+  gnome-settings-daemon &
+
+  # Set fallback cursor.
+  xsetroot -cursor_name left_ptr
+
+  # Set keyboard repeat rate.
+  xset r rate 200 60
+
+  # If Emacs is started in server mode, `emacsclient` is a convenient way to
+  # edit files in place (used by e.g. `git commit`).
+  export VISUAL=emacsclient
+  export EDITOR="$VISUAL"
+
+  # Finally launch emacs.
+  #exec dbus-launch --exit-with-session emacs
+  #compton &
+  # guake &
+  # emacs --daemon -f exwm-enable
+  # exec emacsclient -a "" -c
+  # exec emacs -f exwm-enable
+  exec emacs
+#+END_SRC
+
+To use the tangled ~xinitrc.exwm~, copy or symlink it to ~$HOME/.xinitrc~.
+
+** Testing
+
+Switch to a new TTY console. Usually ~tty1~ is the Desktop Manager itself, and ~tty2~ is you as you read this. To change TTY, just do ~C-M-F#~ where "#" is the Function Key number. Ie, ~C-M-F3~ will get ~tty3~.
+
+Then just login to the console, and run ~startx~. Emacs should start, running as an X Window Manager.
+
+If there is no other X Window server running on the system (ie, you logged in to the console directly, not from a graphical DM) then you can start EXWM with ~xinit -- vt0#~ where '#' is the TTY number.
+
+** Desktop Manager
+
+EXWM may be an option from the existing DM login screen. First do: ~ln -s ~/.xinitrc ~/.xsessions~
+
+Then create the file ~/usr/share/xsessions/exwm.desktop~, like the following.
+
+*NOTE*: you need to *hardcode* your ~<PATHTO>~ since this is a config file not a bash script.
+
+#+BEGIN_EXAMPLE
+  [Desktop Entry]
+  Name=EXWM
+  Comment=Emacs X Window Manager
+  Exec=<PATHTO>/.xsessions
+  Type=Application
+#+END_EXAMPLE
+
+Now, you should have an 'EXWM' option in the gear icon on the GDM login screen. If the testing went OK, then this should work, too since it's calling the same init script.
 
 * Conclusion
 
