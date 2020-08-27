@@ -808,10 +808,12 @@ Projectile + Helm + IDO.
   ;; IDO
   (use-package ido
     :config
-    (use-package ido-vertical-mode)
     ;; (use-package ido-hacks)
-    (ido-mode t)
-    (ido-vertical-mode))
+    (ido-mode t))
+
+  ;;(use-package ido-vertical-mode
+  ;;  :config
+  ;;  (ido-vertical-mode))
 
   (defun ido-find-file-in-tag-files ()
     (interactive)
