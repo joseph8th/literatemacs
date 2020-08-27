@@ -1,7 +1,7 @@
 #+TITLE: LiteratEmacs
 #+AUTHOR: Joseph Edwards VIII
 #+EMAIL: jedwards8th at gmail.com
-#+DATE: <2020-05-23 Sat>
+#+DATE: <2020-08-27 Thu>
 #+CREATED: 2019-02-08
 #+STARTUP: showall hidestars indent
 #+PROPERTY: header-args :results silent :tangle "./init.el"
@@ -473,7 +473,7 @@ SanityInc used to be my go-to, but I'm trying out Material for a while.
 #+BEGIN_SRC emacs-lisp :tangle no
   ;; Extra dark BG with bright chars
   (use-package color-theme-sanityinc-tomorrow
-    :defer t)
+    )
   ;; (load-theme 'sanityinc-tomorrow-bright)
 #+END_SRC
 
@@ -515,7 +515,7 @@ SanityInc used to be my go-to, but I'm trying out Material for a while.
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
     ;; Actual load here
-    (load-theme 'doom-vibrant t)
+    (load-theme 'doom-dark+ t)
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
@@ -659,14 +659,14 @@ There's about 90 billion different ways to do these things. I'm still figuring o
 #+BEGIN_SRC emacs-lisp
   ;; Company support - text completion
   (use-package company
-    :defer t
+
     :config
     (setq company-idle-delay 0))
 
 
   ;; Flycheck (add to mode hooks per language)
   (use-package flycheck
-    :defer t
+
     :config
     (use-package flycheck-inline
       :hook (flycheck-mode . turn-on-flycheck-inline)))
@@ -693,7 +693,7 @@ There's about 90 billion different ways to do these things. I'm still figuring o
 
   ;; Yasnippet
   (use-package yasnippet
-    :defer t
+
     :init
     (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
     :bind (:map yas-minor-mode-map
@@ -712,7 +712,7 @@ Don't use it as often as I should. Old habits and all that.
 #+BEGIN_SRC emacs-lisp
   ;; Magit, of course
   (use-package magit
-    :defer t
+
     :bind (("C-x g" . magit-status))
     :config
     (use-package magit-popup))
@@ -737,11 +737,14 @@ Multiple cursor support. Faster grepping. A REST client (bye-bye Postman).
   (use-package ag)
 
   ;; REST Client in Emacs? But of course!
-  (use-package restclient :defer t)
+  (use-package restclient
+
+    :config
+    (use-package ob-restclient))
 
   ;; SO in Emacs? Uh-huh. (Thx Jamie)
   (use-package sx
-    :defer t
+
     :config
     (bind-keys :prefix "C-c s"
                :prefix-map my-sx-map
@@ -787,10 +790,10 @@ Because it's the best way to deal with ~docker~ and ~docker-compose~.
 
 Because why not?
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   ;; Emacs interface to vagrant
   (use-package
-    :defer t
+
     vagrant-tramp)
 #+END_SRC
 
@@ -986,7 +989,7 @@ I use the iPython3 interpreter, so make sure it's installed.
   ;; Basic python-mode config. I've been using this for years with no problems.
   (use-package python
     :mode ("\\.py\\'" . python-mode)
-    :interpreter ("/usr/bin/ipython3" . python-mode)
+    :interpreter ("/usr/bin/python3" . python-mode)
     :hook (python-mode . fci-mode)
     :config
     (use-package pyvenv))
@@ -1014,16 +1017,16 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
   ;;  ----------------------------------------------------------------------------
 
   (use-package web-mode
-    :defer t)
+    )
   (use-package mmm-mode
-    :defer t
+
     :init
     (setq mmm-global-mode 'maybe)
     :config
     (mmm-add-mode-ext-class 'html-mode "\\.php\\'" 'html-php))
 
   (use-package php-mode
-    :defer t
+
     :hook ((php-mode . editorconfig-mode)
            (php-mode . fci-mode)
            (php-mode . (lambda ()
@@ -1046,7 +1049,7 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
   ;;  ----------------------------------------------------------------------------
 
   (use-package markdown-mode
-    :defer t
+
     :commands (markdown-mode gfm-mode)
     :mode (("README\\.md\\'" . gfm-mode)
            ("\\.md\\'" . markdown-mode)
@@ -1054,7 +1057,7 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
     :init (setq markdown-command "multimarkdown"))
 
   (use-package markdown-preview-mode
-    :defer t
+
     :config
     (add-to-list 'markdown-preview-stylesheets "https://raw.githubusercontent.com/richleland/pygments-css/master/emacs.css"))
 #+END_SRC
@@ -1066,11 +1069,11 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
 ;;  ----------------------------------------------------------------------------
 
 (use-package json-mode
-  :defer t)
+  )
 (use-package json-reformat
-  :defer t)
+  )
 (use-package jsonrpc
-  :defer t)
+  )
 #+END_SRC
 
 *** XML
@@ -1112,7 +1115,7 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
   ;;  ----------------------------------------------------------------------------
 
   (use-package yaml-mode
-    :defer t
+
     :init
     (setq indent-tabs-mode nil)
     :mode "\\.yml\\'"
@@ -1135,7 +1138,7 @@ See [[https://millejoh.github.io/emacs-ipython-notebook/][EIN]] for requirements
   ;;  ----------------------------------------------------------------------------
 
   (use-package ein
-    :defer t
+
     :config
     (use-package ein-notebook)
     (use-package ein-subpackages)
@@ -1154,16 +1157,16 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
   ;; Rust lang
   (add-to-list 'exec-path "~/.cargo/bin")
   (use-package rust-mode
-    :defer t
+
     :mode "\\.rs\\'"
     :config (setq rust-format-on-save t)
     :init
     (add-hook 'rust-mode-hook 'fci-mode))
 
   (use-package rustic
-    :defer t)
+    )
   (use-package cargo
-    :defer t
+
     :init
     (add-hook 'rust-mode-hook 'cargo-minor-mode)
     (add-hook 'rust-mode-hook
@@ -1172,7 +1175,7 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
     (add-hook 'toml-mode-hook 'cargo-minor-mode))
 
   (use-package racer
-    :defer t
+
     :init
     (add-hook 'rust-mode-hook #'racer-mode)
     (add-hook 'racer-mode-hook #'eldoc-mode)
@@ -1185,7 +1188,7 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
 
   ;; Flycheck for Rust
   (use-package flycheck-rust
-    :defer t
+
     :init
     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+END_SRC
@@ -1198,8 +1201,7 @@ I don't use Go very often, so it's not tangled by default.
   ;;; Go
   ;;  ----------------------------------------------------------------------------
 
-  (use-package go-mode
-    :defer t)
+  (use-package go-mode)
 #+END_SRC
 
 **** Javascript
@@ -1232,10 +1234,10 @@ I'll get around to tricking out \LaTeX\ one of these days.
 Really, really nice to have for rendering ASCII charts and embedding them in ~org-mode~ exports. Must install ~ditaa.jar~ and update the path for this to work.
 
 #+BEGIN_SRC emacs-lisp :tangle no
-;;; ditaa.jar
-;;  ----------------------------------------------------------------------------
+  ;;; ditaa.jar
+  ;;  ----------------------------------------------------------------------------
 
-(setq org-ditaa-jar-path "/usr/bin/ditaa")
+  (setq org-ditaa-jar-path "/usr/bin/ditaa")
 #+END_SRC
 
 **** GNUPlot
@@ -1312,6 +1314,7 @@ Oh yeah, and have to completely override ~org-html-fontify-code~ for export to w
        (python . t)
        (ditaa . t)
        (sql . t)
+       (restclient . t)
        )))
 
   ;; Want to ignore headlines but not section contents if :ignore: added
@@ -1417,6 +1420,14 @@ For my ~oporg~ project (WIP), so not tangled by default.
     (ws-stop-all))
 #+END_SRC
 
+** Dungeons & Dragons
+
+Because Emacs rocks.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-d20)
+#+END_SRC
+
 ** Writing mode
 
 Based on [[https://azer.bike/journal/ia-writer-mode-for-emacs/][this post]]. For creative writing.
@@ -1502,7 +1513,7 @@ Optional packages:
 
 *To Tangle*: delete ~:tangle no~ from the block header.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   ;;; Load the EXWM config from a separate file if it exists
 
   (if (file-exists-p "~/.emacs.d/exwm-init.el")
@@ -1511,124 +1522,124 @@ Optional packages:
 
 *To Tangle*: change ~:tangle no~ to ~:tangle exwm-init.el~.
 
-#+BEGIN_SRC emacs-lisp :tangle exwm-init.el
-  ;;; ----------------------------------------------------------------------------
-  ;;  exwm - emacs X window manager
+#+BEGIN_SRC emacs-lisp :tangle no
+    ;;; ----------------------------------------------------------------------------
+    ;;  exwm - emacs X window manager
 
-  ;; (menu-bar-mode -1)
-  ;; (tool-bar-mode -1)
-  ;; (scroll-bar-mode -1)
-  (fringe-mode 1)
-  ;; (ido-mode 1)
-  ;; (server-start)
+    ;; (menu-bar-mode -1)
+    ;; (tool-bar-mode -1)
+    ;; (scroll-bar-mode -1)
+    (fringe-mode 1)
+    ;; (ido-mode 1)
+    ;; (server-start)
 
-  (require 'exwm)
-  (require 'exwm-config)
-  (exwm-config-ido)
+    (require 'exwm)
+    (require 'exwm-config)
+    (exwm-config-ido)
 
-  (setq exwm-workspace-number 4)
+    (setq exwm-workspace-number 4)
 
-  ;; All buffers created in EXWM mode are named "*EXWM*". You may want to
-  ;; change it in `exwm-update-class-hook' and `exwm-update-title-hook', which
-  ;; are run when a new X window class name or title is available.  Here's
-  ;; some advice on this topic:
-  ;; + Always use `exwm-workspace-rename-buffer` to avoid naming conflict.
-  ;; + For applications with multiple windows (e.g. GIMP), the class names of
-  ;    all windows are probably the same.  Using window titles for them makes
-  ;;   more sense.
-  ;; In the following example, we use class names for all windows except for
-  ;; Java applications and GIMP.
-  (add-hook 'exwm-update-class-hook
-            (lambda ()
-              (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+    ;; All buffers created in EXWM mode are named "*EXWM*". You may want to
+    ;; change it in `exwm-update-class-hook' and `exwm-update-title-hook', which
+    ;; are run when a new X window class name or title is available.  Here's
+    ;; some advice on this topic:
+    ;; + Always use `exwm-workspace-rename-buffer` to avoid naming conflict.
+    ;; + For applications with multiple windows (e.g. GIMP), the class names of
+    ;    all windows are probably the same.  Using window titles for them makes
+    ;;   more sense.
+    ;; In the following example, we use class names for all windows except for
+    ;; Java applications and GIMP.
+    (add-hook 'exwm-update-class-hook
+              (lambda ()
+                (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                            (string= "gimp" exwm-instance-name))
+                  (exwm-workspace-rename-buffer exwm-class-name))))
+    (add-hook 'exwm-update-title-hook
+              (lambda ()
+                (when (or (not exwm-instance-name)
+                          (string-prefix-p "sun-awt-X11-" exwm-instance-name)
                           (string= "gimp" exwm-instance-name))
-                (exwm-workspace-rename-buffer exwm-class-name))))
-  (add-hook 'exwm-update-title-hook
-            (lambda ()
-              (when (or (not exwm-instance-name)
-                        (string-prefix-p "sun-awt-X11-" exwm-instance-name)
-                        (string= "gimp" exwm-instance-name))
-                (exwm-workspace-rename-buffer exwm-title))))
+                  (exwm-workspace-rename-buffer exwm-title))))
 
-  ;; Global keybindings can be defined with `exwm-input-global-keys'.
-  ;; Here are a few examples:
-  (setq exwm-input-global-keys
-        `(
-          ;; Bind "s-r" to exit char-mode and fullscreen mode.
-          ([?\s-r] . exwm-reset)
-          ;; Bind "s-w" to switch workspace interactively.
-          ([?\s-w] . exwm-workspace-switch)
-          ;; Bind "s-0" to "s-9" to switch to a workspace by its index.
-          ,@(mapcar (lambda (i)
-                      `(,(kbd (format "s-%d" i)) .
-                        (lambda ()
-                          (interactive)
-                          (exwm-workspace-switch-create ,i))))
-                    (number-sequence 0 9))
-          ;; Bind "s-&" to launch applications ('M-&' also works if the output
-          ;; buffer does not bother you).
-          ([?\s-menu] . (lambda (command)
-                       (interactive (list (read-shell-command "$ ")))
-                       (start-process-shell-command command nil command)))
-          ;; Bind "s-<f2>" to "slock", a simple X display locker.
-          ([s-f2] . (lambda ()
-                      (interactive)
-                      (start-process "" nil "/usr/bin/slock")))))
+    ;; Global keybindings can be defined with `exwm-input-global-keys'.
+    ;; Here are a few examples:
+    (setq exwm-input-global-keys
+          `(
+            ;; Bind "s-r" to exit char-mode and fullscreen mode.
+            ([?\s-r] . exwm-reset)
+            ;; Bind "s-w" to switch workspace interactively.
+            ([?\s-w] . exwm-workspace-switch)
+            ;; Bind "s-0" to "s-9" to switch to a workspace by its index.
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch-create ,i))))
+                      (number-sequence 0 9))
+            ;; Bind "s-&" to launch applications ('M-&' also works if the output
+            ;; buffer does not bother you). [?\s-&]
+            ([?\s-&] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))
+            ;; Bind "s-<f2>" to "slock", a simple X display locker.
+            ([s-f2] . (lambda ()
+                        (interactive)
+                        (start-process "" nil "/usr/bin/slock")))))
 
-  ;; To add a key binding only available in line-mode, simply define it in
-  ;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.
-  (define-key exwm-mode-map [?\C-q] #'exwm-input-send-next-key)
+    ;; To add a key binding only available in line-mode, simply define it in
+    ;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.
+    (define-key exwm-mode-map [?\C-q] #'exwm-input-send-next-key)
 
-  ;; The following example demonstrates how to use simulation keys to mimic
-  ;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
-  ;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
-  ;; and DEST is what EXWM actually sends to application.  Note that both SRC
-  ;; and DEST should be key sequences (vector or string).
-  (setq exwm-input-simulation-keys
-        '(
-          ;; movement
-          ([?\C-b] . [left])
-          ([?\M-b] . [C-left])
-          ([?\C-f] . [right])
-          ([?\M-f] . [C-right])
-          ([?\C-p] . [up])
-          ([?\C-n] . [down])
-          ([?\C-a] . [home])
-          ([?\C-e] . [end])
-          ([?\M-v] . [prior])
-          ([?\C-v] . [next])
-          ([?\C-d] . [delete])
-          ([?\C-k] . [S-end delete])
-          ;; cut/paste.
-          ([?\C-w] . [?\C-x])
-          ([?\M-w] . [?\C-c])
-          ([?\C-y] . [?\C-v])
-          ;; search
-          ([?\C-s] . [?\C-f])))
+    ;; The following example demonstrates how to use simulation keys to mimic
+    ;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
+    ;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
+    ;; and DEST is what EXWM actually sends to application.  Note that both SRC
+    ;; and DEST should be key sequences (vector or string).
+    ;;(setq exwm-input-simulation-keys
+    ;;      '(
+    ;;        ;; movement
+    ;;        ([?\C-b] . [left])
+    ;;        ([?\M-b] . [C-left])
+    ;;        ([?\C-f] . [right])
+    ;;        ([?\M-f] . [C-right])
+    ;;        ([?\C-p] . [up])
+    ;;        ([?\C-n] . [down])
+    ;;        ([?\C-a] . [home])
+    ;;        ([?\C-e] . [end])
+    ;;        ([?\M-v] . [prior])
+    ;;        ([?\C-v] . [next])
+    ;;        ([?\C-d] . [delete])
+    ;;        ([?\C-k] . [S-end delete])
+    ;;        ;; cut/paste.
+    ;;        ([?\C-w] . [?\C-x])
+    ;;        ([?\M-w] . [?\C-c])
+    ;;        ([?\C-y] . [?\C-v])
+    ;;        ;; search
+    ;;        ([?\C-s] . [?\C-f])))
 
-  ;; You can hide the minibuffer and echo area when they're not used, by
-  ;; uncommenting the following line.
-  (setq exwm-workspace-minibuffer-position 'bottom)
+    ;; You can hide the minibuffer and echo area when they're not used, by
+    ;; uncommenting the following line.
+    ;(setq exwm-workspace-minibuffer-position 'bottom)
 
-  ;; Multiple-screen support
-  ;; (require 'exwm-randr)
-  ;; (setq exwm-randr-workspace-output-plist '(0 "VGA1"))
-  ;; (add-hook 'exwm-randr-screen-change-hook
-  ;;           (lambda ()
-  ;;             (start-process-shell-command
-  ;;              "xrandr" nil "xrandr --output VGA1 --left-of LVDS1 --auto")))
-  ;; (exwm-randr-enable)
+    ;; Multiple-screen support
+    ;; (require 'exwm-randr)
+    ;; (setq exwm-randr-workspace-output-plist '(0 "VGA1"))
+    ;; (add-hook 'exwm-randr-screen-change-hook
+    ;;           (lambda ()
+    ;;             (start-process-shell-command
+    ;;              "xrandr" nil "xrandr --output VGA1 --left-of LVDS1 --auto")))
+    ;; (exwm-randr-enable)
 
-  ;;; In case we're embedded in LXDE
-  ;;  (defun exwm-logout ()
-  ;;    (interactive)
-  ;;    (recentf-save-list)
-  ;;    (save-some-buffers)
-  ;;    (start-process-shell-command "logout" nil "lxsession-logout"))
+    ;;; In case we're embedded in LXDE
+    ;;  (defun exwm-logout ()
+    ;;    (interactive)
+    ;;    (recentf-save-list)
+    ;;    (save-some-buffers)
+    ;;    (start-process-shell-command "logout" nil "lxsession-logout"))
 
-  ;; Do not forget to enable EXWM. It will start by itself when things are
-  ;; ready.  You can put it _anywhere_ in your configuration.
-  (exwm-enable)
+    ;; Do not forget to enable EXWM. It will start by itself when things are
+    ;; ready.  You can put it _anywhere_ in your configuration.
+    (exwm-enable)
 #+END_SRC
 
 ** XOrg XInit
@@ -1639,7 +1650,7 @@ Using GDM, ~.xinitrc~ will not interfere with the existing Gnome DE. *BUT*, if t
 
 *To Tangle*: change ~:tangle no~ to ~:tangle xinitrc.exwm~. Otherwise, just use as reference.
 
-#+BEGIN_SRC bash :tangle xinitrc.exwm
+#+BEGIN_SRC bash :tangle no
   # You may need to comment out the next line to disable access control.
   #xhost +SI:localuser:$USER
 
@@ -1661,6 +1672,9 @@ Using GDM, ~.xinitrc~ will not interfere with the existing Gnome DE. *BUT*, if t
   #exec dbus-launch --exit-with-session emacs
   #compton &
   # guake &
+  # emacs --daemon -f exwm-enable
+  # exec emacsclient -a "" -c
+  # exec emacs -f exwm-enable
   exec emacs
 #+END_SRC
 

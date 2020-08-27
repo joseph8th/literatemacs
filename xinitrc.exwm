@@ -19,4 +19,7 @@ export EDITOR="$VISUAL"
 #exec dbus-launch --exit-with-session emacs
 #compton &
 # guake &
+# emacs --daemon -f exwm-enable
+# exec emacsclient -a "" -c
+# exec emacs -f exwm-enable
 exec emacs
