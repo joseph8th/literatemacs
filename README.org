@@ -659,14 +659,12 @@ There's about 90 billion different ways to do these things. I'm still figuring o
 #+BEGIN_SRC emacs-lisp
   ;; Company support - text completion
   (use-package company
-
     :config
     (setq company-idle-delay 0))
 
 
   ;; Flycheck (add to mode hooks per language)
   (use-package flycheck
-
     :config
     (use-package flycheck-inline
       :hook (flycheck-mode . turn-on-flycheck-inline)))
@@ -693,7 +691,6 @@ There's about 90 billion different ways to do these things. I'm still figuring o
 
   ;; Yasnippet
   (use-package yasnippet
-
     :init
     (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
     :bind (:map yas-minor-mode-map
@@ -712,7 +709,6 @@ Don't use it as often as I should. Old habits and all that.
 #+BEGIN_SRC emacs-lisp
   ;; Magit, of course
   (use-package magit
-
     :bind (("C-x g" . magit-status))
     :config
     (use-package magit-popup))
@@ -738,13 +734,11 @@ Multiple cursor support. Faster grepping. A REST client (bye-bye Postman).
 
   ;; REST Client in Emacs? But of course!
   (use-package restclient
-
     :config
     (use-package ob-restclient))
 
   ;; SO in Emacs? Uh-huh. (Thx Jamie)
   (use-package sx
-
     :config
     (bind-keys :prefix "C-c s"
                :prefix-map my-sx-map
@@ -793,7 +787,6 @@ Because why not?
 #+BEGIN_SRC emacs-lisp
   ;; Emacs interface to vagrant
   (use-package
-
     vagrant-tramp)
 #+END_SRC
 
@@ -1026,17 +1019,14 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
   ;;; PHP and HTML
   ;;  ----------------------------------------------------------------------------
 
-  (use-package web-mode
-    )
+  (use-package web-mode)
   (use-package mmm-mode
-
     :init
     (setq mmm-global-mode 'maybe)
     :config
     (mmm-add-mode-ext-class 'html-mode "\\.php\\'" 'html-php))
 
   (use-package php-mode
-
     :hook ((php-mode . editorconfig-mode)
            (php-mode . fci-mode)
            (php-mode . (lambda ()
@@ -1078,12 +1068,9 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
 ;;; JSON
 ;;  ----------------------------------------------------------------------------
 
-(use-package json-mode
-  )
-(use-package json-reformat
-  )
-(use-package jsonrpc
-  )
+(use-package json-mode)
+(use-package json-reformat)
+(use-package jsonrpc)
 #+END_SRC
 
 *** XML
@@ -1125,7 +1112,6 @@ Honestly, ~web-mode~ is the way to go with mixed language files.
   ;;  ----------------------------------------------------------------------------
 
   (use-package yaml-mode
-
     :init
     (setq indent-tabs-mode nil)
     :mode "\\.yml\\'"
@@ -1148,7 +1134,6 @@ See [[https://millejoh.github.io/emacs-ipython-notebook/][EIN]] for requirements
   ;;  ----------------------------------------------------------------------------
 
   (use-package ein
-
     :config
     (use-package ein-notebook)
     (use-package ein-subpackages)
@@ -1167,16 +1152,13 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
   ;; Rust lang
   (add-to-list 'exec-path "~/.cargo/bin")
   (use-package rust-mode
-
     :mode "\\.rs\\'"
     :config (setq rust-format-on-save t)
     :init
     (add-hook 'rust-mode-hook 'fci-mode))
 
-  (use-package rustic
-    )
+  (use-package rustic)
   (use-package cargo
-
     :init
     (add-hook 'rust-mode-hook 'cargo-minor-mode)
     (add-hook 'rust-mode-hook
@@ -1185,7 +1167,6 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
     (add-hook 'toml-mode-hook 'cargo-minor-mode))
 
   (use-package racer
-
     :init
     (add-hook 'rust-mode-hook #'racer-mode)
     (add-hook 'racer-mode-hook #'eldoc-mode)
@@ -1198,7 +1179,6 @@ There's a bunch of dependencies required for ~rust-playground~ and ~racer-mode~ 
 
   ;; Flycheck for Rust
   (use-package flycheck-rust
-
     :init
     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+END_SRC
