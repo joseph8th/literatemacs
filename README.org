@@ -1697,7 +1697,7 @@ Now, you should have an 'EXWM' option in the gear icon on the GDM login screen. 
 
 * Conclusion
 
-Tangles on save.
+Tangle on save? Reload after tangle? These hooks will ask you after every save.
 
 ;; Local Variables:
 ;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t)
