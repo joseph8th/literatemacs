@@ -18,7 +18,7 @@ To stop Emacs from tangling a block of code, add ~:tangle no~ like this: ~#+BEGI
 
 ** Requirements
 
-I was able to use the ~init.el~ this file was derived from with Emacs in Windows with very few changes, so it should work on most systems. There are a few requirements. These may be edited out by setting ~:tangle no~.
+These may be edited out by setting ~:tangle no~ or changing them to suit.
 
 - ~ag~ needed by ~dumb-jump~ and ~ag~
 - ~editorconfig~ needed by any ~prog-mode~
