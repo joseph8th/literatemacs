@@ -110,12 +110,13 @@ If you choose option #3, it will also ask you if you want to "Reload?" If this i
 
 *** Link
 
-Finally, if you haven't already done so, you can link your new ~./init.el~ file into your ~$HOME/.emacs.d/~ directory:
+Finally, if you haven't already done so, you can link your new ~./init.el~ file and necessary ~elisp/~ directory into your ~$HOME/.emacs.d/~ directory:
 
-#+BEGIN_SRC sh :tangle no
+#+BEGIN_SRC bash :tangle no
   cd ~/.emacs.d
   rm init.el
   ln -s ~/PATH/TO/literatemacs/init.el .
+  ln -s ~/PATH/TO/literatemacs/elisp .
 #+END_SRC
 
 *** Reload
@@ -133,7 +134,7 @@ Stuff to do during startup.
   ;;  -----------------------------------------------------------------------------
 
   (package-initialize)
-  (add-to-list 'load-path "~/.emacs.d/lisp")
+  (add-to-list 'load-path "~/.emacs.d/elisp")
   (add-to-list 'load-path "~/.emacs.d/elpa")
 
   ;; Keep custom settings in a separate file to not pollute this one
@@ -801,31 +802,16 @@ Projectile + Helm + IDO.
   (use-package ido
     :config
     (use-package ido-hacks)
-    (use-package ido-sort-mtime)
+    (use-package ido-sort-mtime
+      :config
+      (setq ido-sort-mtime-tramp-files-at-end nil)
+      :init
+      (ido-sort-mtime-mode 1))
+    :init
     (ido-mode t))
 
-  ;;; ido-vertical-mode.el is broken, so I snagged this from emacswiki.org
-  ;; Display ido results vertically, rather than horizontally
-  (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
-
-  (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
-  (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)
-  (defun ido-define-keys () ;; C-n/p is more intuitive in vertical layout
-    (define-key ido-completion-map (kbd "C-n") 'ido-next-match)
-    (define-key ido-completion-map (kbd "C-p") 'ido-prev-match))
-  (add-hook 'ido-setup-hook 'ido-define-keys)
-
-  (defun ido-find-file-in-tag-files ()
-    (interactive)
-    (save-excursion
-      (let ((enable-recursive-minibuffers t))
-        (visit-tags-table-buffer))
-      (find-file
-       (expand-file-name
-        (ido-completing-read
-         "Project file: " (tags-table-files) nil t)))))
-
-  (global-set-key (kbd "C-S-x C-S-f") 'ido-find-file-in-tag-files)
+  (load "ido-vertical.el")
+  (ido-vertical-mode 1)
 
   ;; Projectile
   (use-package projectile

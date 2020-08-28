@@ -1,5 +1,6 @@
 /tmp
 *.el
+!elisp/*.el
 *.*~
 *.bak
 *xinitrc*
