@@ -22,7 +22,6 @@ These may be edited out by setting ~:tangle no~ or changing them to suit.
 
 - ~ag~ needed by ~dumb-jump~ and ~ag~
 - ~editorconfig~ needed by any ~prog-mode~
-- ~ipython3~ needed to replace system's Python interpreter
 
 ** Installation
 
