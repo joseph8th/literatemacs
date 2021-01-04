@@ -1470,7 +1470,7 @@ Oh yeah, and have to completely override ~org-html-fontify-code~ for export to w
 
 *** Fix fci-mode conflict
 
-#+begin_src
+#+begin_src emacs-lisp
   ;; Patch ox-html.el org-html-fontify-code to avoid weird newline chars with fci-mode
   (eval-after-load "ox-html"
     '(defun org-html-fontify-code (code lang)
