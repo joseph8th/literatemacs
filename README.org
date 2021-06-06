@@ -1,7 +1,7 @@
 #+TITLE: LiteratEmacs
 #+AUTHOR: Joseph Edwards VIII
 #+EMAIL: jedwards8th at gmail.com
-#+DATE: <2021-01-01 Fri>
+#+DATE: <2021-06-06 Sun>
 #+CREATED: 2019-02-08
 #+STARTUP: showall hidestars indent
 #+PROPERTY: header-args :results silent :tangle "./init.el"
@@ -321,13 +321,6 @@ Couple items here taken from "Dave's .emacs" (marked DHA)
 
   ;;; [DHA] Keep a much bigger shell command history for M-p
   (setq comint-input-ring-size 1000)
-
-  ;;; [DHA] Avoid unicodeisms in my shell buffers
-  (defun my-shell-customizations ()
-    "Set shell encoding"
-    (set-buffer-process-coding-system 'us-ascii-unix 'us-ascii-unix)
-  )
-  (setq shell-mode-hook 'my-shell-customizations)
 #+end_src
 
 ** Better file buffer
@@ -438,7 +431,9 @@ I like a single maximized frame per display these days.
 
 #+begin_src emacs-lisp
   ;; Fullscreen maximized frame in GUI mode
-  (modify-all-frames-parameters '((fullscreen . maximized)))
+  (custom-set-variables
+   '(initial-frame-alist (quote ((fullscreen . maximized))))
+  ; (modify-all-frames-parameters '((fullscreen . maximized)))
 
   ;; disable toolbar-mode in GUI
   (tool-bar-mode -1)
@@ -447,9 +442,9 @@ I like a single maximized frame per display these days.
   (scroll-bar-mode -1)
 
   ;; [DHA] I *never* use the stupid thing..
+  (menu-bar-mode -1)
   ;; [JEE] I do, so mapped to a toggle keybinding
   (global-set-key (kbd "<C-menu>") 'menu-bar-mode)
-  (menu-bar-mode -1)
 #+end_src
 
 ** Window configuration
@@ -478,6 +473,15 @@ Want that crazy window config for D&D back, with all 11 windows and indirect buf
 #+begin_src emacs-lisp
   (use-package burly
     :quelpa (burly :fetcher github :repo "alphapapa/burly.el"))
+#+end_src
+
+*** Popwin
+
+Groovy 'lil package [[https://github.com/emacsorphanage/popwin][popwin.el]] does nothin' but put all the noise buffers like =*Completions*= in an easily dismissed popup window.
+
+#+begin_src emacs-lisp
+  (use-package popwin)
+  (popwin-mode 1)
 #+end_src
 
 ** Appearance
@@ -840,10 +844,12 @@ I used to use only Ido but trying [[https://github.com/abo-abo/swiper][Ivy]] out
 
 #+begin_src emacs-lisp
   ;; Counsel with Ivy and Swiper - config cribbed as-is from Ivy documentation
+  ;; Add to :bind to use swiper instead of incremental search:
+  ;; ("C-s" . swiper)
+
   (use-package ivy
     :diminish
-    :bind (("C-s" . swiper)
-           :map ivy-minibuffer-map
+    :bind (:map ivy-minibuffer-map
            ("TAB" . ivy-alt-done)
            ("C-m" . ivy-alt-done)
            ("C-j" . ivy-immediate-done)
