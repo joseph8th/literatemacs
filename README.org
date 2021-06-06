@@ -8,7 +8,7 @@
 
 *This file IS the program.*
 
-A [[https://en.wikipedia.org/wiki/Literate_programming][literate]] README that produces an ~init.el~, personalized to my tastes. Uses ~package.el~ and ~use-package~.
+A [[https://en.wikipedia.org/wiki/Literate_programming][literate]] README that produces an ~init.el~, personalized to my tastes. Uses ~package.el~, ~use-package~, and ~quelpa~.
 
 * Introduction
 
