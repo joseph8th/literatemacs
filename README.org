@@ -431,9 +431,9 @@ I like a single maximized frame per display these days.
 
 #+begin_src emacs-lisp
   ;; Fullscreen maximized frame in GUI mode
-  (custom-set-variables
-   '(initial-frame-alist (quote ((fullscreen . maximized))))
-  ; (modify-all-frames-parameters '((fullscreen . maximized)))
+  ; (custom-set-variables
+  ;  '(initial-frame-alist (quote ((fullscreen . maximized))))
+  (modify-all-frames-parameters '((fullscreen . maximized)))
 
   ;; disable toolbar-mode in GUI
   (tool-bar-mode -1)
